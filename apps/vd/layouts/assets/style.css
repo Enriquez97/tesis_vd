@@ -1,0 +1,23 @@
+#uploader {
+    border: 1px dashed rgb(206, 212, 218);
+    border-radius: 5px;
+    max-width: 420px;
+}
+
+#contents {
+    padding: 1rem 1rem 3.125rem
+}
+
+#upload-button {
+    position: absolute; 
+    bottom: -1.2rem;
+    width: 15.625rem;
+}
+
+.upload-icon {
+    color: rgb(24, 49, 83)
+}
+
+.upload-text {
+    color: rgb(134, 142, 150)
+}
