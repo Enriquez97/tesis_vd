@@ -7,7 +7,7 @@ import numpy as np
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-service = Service(executable_path='chromedriver.exe')
+
 
 
 
@@ -15,7 +15,7 @@ service = Service(executable_path='chromedriver.exe')
 def descarga_lista_last(wait = 30, usuario = '', password = ''):
     options = webdriver.ChromeOptions()
     options.add_experimental_option("detach", True)
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(options=options,service=Service(executable_path='chromedriver.exe'))
     driver.implicitly_wait(wait)
     options.add_argument("--start-maximized")
     driver.get("http://seaap.minsa.gob.pe/web/login")  

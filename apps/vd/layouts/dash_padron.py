@@ -8,13 +8,14 @@ import io
 import pandas as pd
 from google.cloud import bigquery
 from apps.vd.utils.transforms import clean_padron
-from apps.vd.utils.components import title, loadingOverlay, upload,select, multiSelect,notification,segmented
+from apps.vd.utils.components import *
 from apps.vd.utils.frames import Container,Div, Row ,Column, Store
 from apps.vd.utils.data import padron_df_dash, padron_anio_list
 from apps.vd.utils.functions import dataframe_filtro, validar_all_none
 from apps.vd.utils.cards import cardGraph
 from apps.vd.utils.figures import line_figure,pie_figure, bar_go_figure
 import dash_ag_grid as dag
+
 #client = bigquery.Client()
 
 # Perform a query.
@@ -55,6 +56,12 @@ def dash_carga_padron():
                 #dcc.Graph(id='graph-2')
                 Div(id='graph-2')
             ],size=6),
+        ]),
+        Row([
+            Column([
+                button(text = 'Revisar', id = 'btn')
+            ],size=12),
+            
         ]),
         
         
