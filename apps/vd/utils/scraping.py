@@ -14,7 +14,7 @@ from selenium.webdriver.common.by import By
 
 def descarga_lista_last(wait = 30, usuario = '', password = ''):
     options = webdriver.ChromeOptions()
-    options.add_experimental_option("detach", True)
+    #options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=options,service=Service(executable_path='chromedriver.exe'))
     driver.implicitly_wait(wait)
     options.add_argument("--start-maximized")
