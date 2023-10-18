@@ -9,7 +9,7 @@ import pandas as pd
 from google.cloud import bigquery
 from apps.vd.data.transformacion import clean_padron
 from apps.vd.utils.components import *
-from apps.vd.utils.frames import Container,Div, Row ,Column, Store,Content
+from apps.vd.utils.frames import Container,Div, Row ,Column, Store,Content,Modal
 #from apps.vd.utils.data import padron_df_dash, padron_anio_list
 from apps.vd.utils.functions import dataframe_filtro, validar_all_none
 from apps.vd.utils.cards import cardGraph
@@ -27,6 +27,7 @@ import plotly.express as px
 def dash_carga_compromiso():
     app = DjangoDash('carga-compromiso',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([
+        
         Row([Column([title(content='Importar datos del Compromiso 1',order=1)],size=12)]),
         
         

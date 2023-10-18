@@ -89,8 +89,15 @@ def create_stack_np(dataframe = pd.DataFrame(), lista = []):
 def create_hover_custom(lista = []):
     string_hover = ''
     for i,element in zip(range(len(lista)),lista):
-         if element == 'AREA_CAMPAÑA' or element == 'AREA' or element == 'Area':
+         if element == 'w' or element == 'w' or element == 'w':
                string_hover = string_hover+'<br>'+element+': <b>%{customdata['+str(i)+']:,.2f}</b>'
          else:
                string_hover = string_hover+'<br>'+element+': <b>%{customdata['+str(i)+']}</b>'   
     return string_hover
+
+def calcular_total_vd(dataframe = None):
+            acumulador = 0
+            for periodo in dataframe['Periodo de Visita'].unique():
+                vd_detalle_periodo=dataframe[dataframe['Periodo de Visita']==periodo]
+                acumulador+=vd_detalle_periodo.groupby(['Número de Documento','Numeró de Visitas Completas']).count().reset_index()['Numeró de Visitas Completas'].sum()
+            return acumulador

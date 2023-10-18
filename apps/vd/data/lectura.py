@@ -57,4 +57,12 @@ def bq_reporte_vd_df():
    
     return reporte_bd_bq_df
 
+def bq_cvd_reporte_df():
+    query_data_cvd = "SELECT * FROM `ew-tesis.dataset_tesis.cvd_detalle_reporte` WHERE Rango_de_Edad ='3 - 5 meses'"
+    cvd_reporte_bq_df = pd.read_gbq(   query = query_data_cvd ,
+                                    project_id = 'ew-tesis',
+                                    credentials = bq_cred,
+                                    dialect = 'standard')
+
+    return cvd_reporte_bq_df
 

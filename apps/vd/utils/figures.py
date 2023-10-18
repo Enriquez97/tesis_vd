@@ -171,3 +171,86 @@ def bar_go_figure(df = pd.DataFrame(), x = '', y = '', text = '', orientation = 
             figure.update_layout(bargap=0.3)
 
         return figure
+
+def figure_bar_px(titulo = '',x_titulo = '',y_titulo = '',l_titulo = '', df = None , x = '', y = '', color = '', barmode = 'stack' , template = 'none', height = 400, showticklabels_x = True,showticklabels_y = True,bottom=100,top=60):
+  fig = px.bar(df, x = x, y = y,color = color, barmode = barmode, template = template,height = height,text_auto=True, color_discrete_sequence=px.colors.qualitative.Safe)
+  fig.update_traces(textfont_size=16,textfont_family = "sans-serif",textfont_color ='black', textangle=0, textposition="outside", cliponaxis=False)
+  fig.update_layout(legend=dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1.02,
+    xanchor="right",
+    x=1
+))
+  fig.update_layout(
+              title = f"<b>{titulo}</b>",
+              title_font_family="sans-serif", 
+              title_font_size = 18,
+              title_font_color = "rgba(0, 0, 0, 0.7)",
+              margin = dict( l = 20, r = 40, b = bottom, t = top, pad = 1, autoexpand = True),
+
+              xaxis_title = '<b>'+x_titulo+'</b>',
+              yaxis_title = '<b>'+y_titulo+'</b>',
+              legend_title_text = l_titulo,
+              legend=dict(font=dict(size=14,color="black"))
+          )
+  fig.update_xaxes(tickfont=dict(size=14),color='black',showticklabels = showticklabels_x,title_font_family="sans-serif",title_font_size = 13,automargin=True)#,showgrid=True, gridwidth=1, gridcolor='black',
+  fig.update_yaxes(tickfont=dict(size=14),color='black',showticklabels = showticklabels_y,title_font_family="sans-serif",title_font_size = 13,automargin=True)  
+  fig.update_traces(hovertemplate ='<br>'+x+': <b>%{x}</b><br>'+y+': <b>%{y}</b>',hoverlabel=dict(font_size=15,bgcolor="white"))
+  #fig.update_layout(paper_bgcolor='#f7f7f7',plot_bgcolor='#f7f7f7')
+  #,type='category'
+  return fig#.show()
+
+def figure_line_px(titulo = '',x_titulo = '',y_titulo = '',l_titulo = '', df = None , x = '', y = '', color = '' , template = 'none', height = 400, showticklabels_x = True,showticklabels_y = True,text ='',facet_row = None,bottom=20,top=40):
+  fig = px.line(df, x = x, y = y,color = color, template = template,height = height, color_discrete_sequence=px.colors.qualitative.Safe,facet_row = facet_row)
+  fig.update_traces(text = text,textfont_size=16,textfont_family = "sans-serif",textfont_color ='black', textposition="bottom right", cliponaxis=False)
+  fig.update_layout(legend=dict(
+    orientation="h",
+    yanchor="bottom",
+    y=1.02,
+    xanchor="right",
+    x=1
+))
+  fig.update_layout(
+              title = f"<b>{titulo}</b>",
+              title_font_family="sans-serif", 
+              title_font_size = 18,
+              title_font_color = "rgba(0, 0, 0, 0.7)",
+              margin = dict( l = 20, r = 40, b = bottom, t = top, pad = 0, autoexpand = True),
+
+              xaxis_title = '<b>'+x_titulo+'</b>',
+              yaxis_title = '<b>'+y_titulo+'</b>',
+              legend_title_text = l_titulo,
+              legend=dict(font=dict(size=14,color="black"))
+          )
+  fig.update_xaxes(tickfont=dict(size=14),color='black',showticklabels = showticklabels_x,title_font_family="sans-serif",title_font_size = 13,automargin=True)#,showgrid=True, gridwidth=1, gridcolor='black',
+  fig.update_yaxes(tickfont=dict(size=14),color='black',showticklabels = showticklabels_y,title_font_family="sans-serif",title_font_size = 13,automargin=True)  
+  fig.update_traces(hovertemplate ='<br>'+x+': <b>%{x}</b><br>'+y+': <b>%{y}</b>',hoverlabel=dict(font_size=15,bgcolor="white"))
+  #fig.update_layout(paper_bgcolor='#f7f7f7',plot_bgcolor='#f7f7f7')
+  #,type='category'
+  return fig
+
+def gauge_figure( value = 0, maximo_value = 100, titulo = '',height = 300):
+  fig = go.Figure(go.Indicator(
+      mode = "gauge+number",#+delta
+      value = value,
+      domain = {'x': [0, 1], 'y': [0, 1]},
+      title = {'text': titulo, 'font': {'size': 20}},
+      #delta = {'reference': 400, 'increasing': {'color': "RebeccaPurple"}},
+      gauge = {
+          'axis': {'range': [None, maximo_value], 'tickwidth': 1, 'tickcolor': "darkblue"},
+          'bar': {'color': "blue"},
+          'bgcolor': "white",
+          'borderwidth': 2,
+          'bordercolor': "gray",
+          #'steps': [
+          #    {'range': [0, 250], 'color': 'cyan'},
+          #    {'range': [250, 400], 'color': 'royalblue'}],
+          #'threshold': {
+          #    'line': {'color': "red", 'width': 4},
+          #    'thickness': 0.9,
+          #    'value': sumador}
+        }))
+
+  fig.update_layout(paper_bgcolor = "white", font = {'color': "black", 'family': "sans-serif",'size': 20},height = height)
+  return fig

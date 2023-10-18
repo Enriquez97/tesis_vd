@@ -239,3 +239,30 @@ def clean_VD_detalle(dataframe = pd.DataFrame()):
     #.apply(lambda x: documento_unique(x['CNV'], x['CUI'],x['DNI'],'DOC'),axis=1)
     dff['Rango_de_Edad'] = dff.apply(lambda x: change_rango_edad(x['Rango_de_Edad']),axis=1)
     return dff
+
+
+############# CHANGE NAME COLUMNS
+
+def change_columns_vdetalle(df = None):
+    df = df.rename(columns = {
+                            'Establecimito_Salud_Meta': 'Establecimiento de Salud', 
+                            'Actor_Social':'Actor Social',
+                            'Numero_Doc_Nino': 'Número de Documento',   
+                            'Nombres_del_Nino': 'Nombres del menor', 
+                            'Dirección_Nino_C': 'Dirección', 
+                            'Rango_de_Edad': 'Rango de Edad', 
+                            'Estado_VD':'Estado de Visita', 
+                            'Etapa_VD':'Tipo de Registro',
+                            'Dispositivo_Intervencion': 'Dispositivo Intervención', 
+                            'Tipo_VD': 'Tipo de Visita', 
+                            'Fecha_Intervencion':'Fecha de Intervención',
+                            'Latitud_Intervencion':'Latitud', 
+                            'Longitud_Intervencion':'Longitud',
+                            'Mes_VD':'Mes de Visita', 
+                            'Anio_VD':'Año de Visita',
+                            'Estado_Intervencion_VD':'Estado de Intervención',
+                            'Numero_VD':'Numeró de Visitas Completas', 
+                            'Periodo_VD':'Periodo de Visita',
+                            'VD_Valida':'Visita Válida'
+                        })
+    return df

@@ -15,4 +15,7 @@ urlpatterns = [
         path("ingesta-any", views.ingesta_any, name="ingesta_any"),
         path("dashboard-seguimiento", views.dashboard_seguimiento_indicadores, name="dashboard_seguimiento"),
         path("analisis-report-vd", views.dashboard_analisis_inicio_vd, name="analisis_vd"),
+        path("vd_detalle_resultados", views.dashboard_resultados_indicadores, name="vd_detalle_resultados"),
+
+        #
 ]

@@ -12,14 +12,14 @@ from ..data.transformacion import clean_columns_padron,clean_columns_c1,clean_VD
 from ..utils.table import table_dag
 from ..data.ingesta import cargarDataPadron,cargarDataCargaVD,cargarDataVDetalle
 
-def modal_child(estado = 'positivo'):
+def modal_child(estado = 'positivo',href = "/"):
         if estado == 'positivo':
             out =[
                 dmc.Text("Guardado"),
                 dmc.Space(h=20),
                 dmc.Group(
                     [
-                    html.A(dmc.Button("Continuar"),href="/",id='link'),
+                    html.A(dmc.Button("Continuar"),href=href,id='link'),
 
                     ],
                     position="right",
@@ -438,7 +438,7 @@ def dash_ingestas():
                     print(df)
                     try:
                         cargarDataVDetalle(df)
-                        return True, modal_child()
+                        return True, modal_child(href='/vd_detalle_resultados')
                     except:
                         return True, modal_child(estado='negativo')  
             
