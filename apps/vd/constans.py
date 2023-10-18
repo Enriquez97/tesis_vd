@@ -15,16 +15,20 @@ EXTERNAL_STYLESHEETS =  [
                             dbc.icons.BOOTSTRAP
                         ]
 
-COLUMNAS_PADRON = [
+DROP_COLUMNAS_PADRON = [
     'N°','TIPO DE DOCUMENTO\nDE IDENTIDAD DEL NIÑO\n(DNI=1\nCUI=2\nCNV=3\nCOD. PAD=4)',
     'CÓDIGO DE UBIGEO\nDEL DISTRITO',
     'NOMBRE DEL \nDEPARTAMENTO', 'NOMBRE DE LA\nPROVINCIA',
     'NOMBRE DEL\nDISTRITO', 'CÓDIGO DE CENTRO\nPOBLADO',
     'CÓDIGO DEL EESS NACIMIENTO','CÓDIGO DEL EESS','CÓDIGO DEL EESS ADSCRIPCIÓN',
-    'TIPO DE SEGURO\nDEL BENEFICIARIO\n0=NINGUNO\n1=SIS\n2=ESSALUD\n3=SANIDAD\n4=PRIVADO\n',
-    'PROGRAMAS SOCIALES DEL NIÑO(A)\n0=NINGUNO\n1=PIN\n2=PVL\n4=JUNTOS\n5=QALIWARMA \n7=CUNA+ SCD\n8=CUNA+ SAF',
+    
     'CODIGO DE\nINSTITUCION \nEDUCATIVA','NOMBRE DE \nINSTITUCION\n EDUCATIVA',
     '\n1=MADRE\n2=PADRE\n3=HERMANO\n4=OTRO FAMILIAR\n5=OTRO','\n1=MADRE\n2=PADRE\n3=HERMANO\n4=OTRO FAMILIAR\n5=OTRO.1',
+]
+
+DROP_COLUMNAS_C1 = ['External ID','Centro de salud Ultima Atención','Lote','Total de llamadas válidas realizadas',
+                     'Dato para saber como fue creado','Referencia Direccion','De seguro menor','Nombre de la madre',
+                     'Paciente con anemía.1','Total de Intervenciones No encontrado y Rechazado'
 ]
 
 COLUMNAS_COMPROMISO_1 = ['External ID',
@@ -50,3 +54,7 @@ COLUMNAS_COMPROMISO_1 = ['External ID',
        'Seguro SIS', 'Total de Intervenciones No encontrado y Rechazado',
        'estado'
 ]
+
+DROP_VD_DETALLADO= ['External ID','Nombre a mostrar','Dispositivo','Duración','Meses','Motivo de límite excedido','Nombre de la madre','Dni de la madre']
+
+EESS_TRUJILLO=['LIBERTAD', 'CLUB DE LEONES', 'LOS GRANADOS "SAGRADO CORAZON"','LOS JARDINES', 'SAN MARTIN DE PORRES', 'PESQUEDA II', 'EL BOSQUE','ARANJUEZ', 'CENTRO DE SALUD LA UNION', 'PESQUEDA III']

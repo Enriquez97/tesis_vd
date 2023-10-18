@@ -1,6 +1,7 @@
 import pandas as pd
 from apps.vd.utils.functions import semana_text,trimestre_text
 
+"""
 padron_nominal_df = pd.read_parquet('padron_nominal.parquet', engine='pyarrow')
 
 padron_df_dash = padron_nominal_df[['ESTADO DE TRAMITE DE DNI','Sexo', 'Fecha de Nacimiento', 'Eje_vial',
@@ -15,3 +16,4 @@ padron_df_dash = padron_nominal_df[['ESTADO DE TRAMITE DE DNI','Sexo', 'Fecha de
 padron_anio_list = sorted(padron_nominal_df['Año'].astype('string').unique())
 padron_eess_atencion_list = sorted(padron_nominal_df['EESS_atencion_padron'].unique())
 padron_entidad_actualiza_list = sorted(padron_nominal_df['Entidad Actualiza'].unique())
+"""

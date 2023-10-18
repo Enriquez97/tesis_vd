@@ -18,6 +18,7 @@ def descarga_lista_last(wait = 30, usuario = '', password = ''):
     driver = webdriver.Chrome(options=options,service=Service(executable_path='chromedriver.exe'))
     driver.implicitly_wait(wait)
     options.add_argument("--start-maximized")
+    options.add_experimental_option("detach", True)
     driver.get("http://seaap.minsa.gob.pe/web/login")  
     input_usuario=driver.find_element("xpath",'/html/body/div/main/div/form/div[1]/input')
     input_usuario.send_keys(usuario)
@@ -74,3 +75,4 @@ def descarga_lista_last(wait = 30, usuario = '', password = ''):
     driver.find_element("xpath",f'/html/body/div[6]/div/div/div[2]/div[2]/div[3]/div[2]/select/option[97]').click()
     time.sleep(1)
     driver.find_element("xpath",'/html/body/div[6]/div/div/div[3]/button[1]').click()
+    time.sleep(1000)

@@ -3,33 +3,25 @@ from apps.vd.constans import EXTERNAL_SCRIPTS, EXTERNAL_STYLESHEETS
 from dash import dcc,html,dash_table, Output, Input, State
 import dash_mantine_components as dmc
 import base64
-import datetime
+
 import io
 import pandas as pd
 from google.cloud import bigquery
-from apps.vd.utils.transforms import clean_padron
+from apps.vd.data.transformacion import clean_padron
 from apps.vd.utils.components import *
 from apps.vd.utils.frames import Container,Div, Row ,Column, Store
-from apps.vd.utils.data import padron_df_dash, padron_anio_list
+#from apps.vd.utils.data import padron_df_dash, padron_anio_list
 from apps.vd.utils.functions import dataframe_filtro, validar_all_none
 from apps.vd.utils.cards import cardGraph
 from apps.vd.utils.figures import line_figure,pie_figure, bar_go_figure
 import dash_ag_grid as dag
+import datetime
+import os
 
-#client = bigquery.Client()
+from apps.vd.data.transformacion import clean_columns_padron, clean_columns_c1
 
-# Perform a query.
-#QUERY = (
-#    'SELECT name FROM `bigquery-public-data.usa_names.usa_1910_2013` '
-#    'WHERE state = "TX" '
-#    'LIMIT 100')
-#query_job = client.query(QUERY)  # API request
-#rows = query_job.result()  # Waits for query to finish
-
-#for row in rows:
-#    print(row.name)
-
-    
+#from apps.vd.data.lectura import padron_dataframe_bq#padron_dataframe_bq
+#print(padron_dataframe_bq)
 def dash_carga_padron():
     app = DjangoDash('carga-padron',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([
@@ -39,11 +31,13 @@ def dash_carga_padron():
         Row([
             Column([
                 upload(upload_id='upload-data-padron-1',stack_id='content-padron-1'),
-                Div(id='output-data-upload-1')
+                dmc.Center(Div(id='output-data-upload-1'))
+                
             ],size=6),
             Column([
                 upload(upload_id='upload-data-padron-2',stack_id='content-padron-2'),
-                Div(id='output-data-upload-2')
+                dmc.Center(Div(id='output-data-upload-2'))
+                
             ],size=6),
         ]),
         
@@ -59,11 +53,18 @@ def dash_carga_padron():
         ]),
         Row([
             Column([
-                button(text = 'Revisar', id = 'btn')
+                dmc.Center(button(text = 'Guardar', id = 'btn-guardar-data'))
+                
             ],size=12),
             
         ]),
-        
+        Row([
+            Column([
+                Div(id='alert')
+            ],size=12),
+            
+        ]),
+        Store(id='data-value'),
         
     ])
     
@@ -72,36 +73,45 @@ def dash_carga_padron():
                 Output('output-data-upload-2', 'children'),
                 Output('graph-1', 'children'),
                 Output('graph-2', 'children'),
+                Output('data-value','data'),
                 Input('upload-data-padron-1', 'contents'),
                 Input('upload-data-padron-2', 'contents'),
+                #Input('btn-guardar-data','n_clicks')
                 
                 )
     def update_output(upload_1, upload_2):
+        #df.to_dict('series'),
         if upload_1 == None and upload_2 == None:
-            return dmc.Text(f"Sin carga"),dmc.Text(f"Sin carga"),dmc.Text(f"Sin tabla"),dmc.Text(f"Sin tabla"),
+            print('sin datos')
+            return [dmc.Text(f"Sin carga"),dmc.Text(f"Sin carga"),dmc.Text(f"Sin tabla"),dmc.Text(f"Sin tabla"),None]
         elif upload_1 != None and upload_2 == None:
             content_string_1 = upload_1.split(',')[1]
             first_decoded = base64.b64decode(content_string_1)
             primer_df = pd.read_excel(io.BytesIO(first_decoded),skiprows=4)
-            df_1=clean_padron(primer_df)
-            
+            #df_1=clean_padron(primer_df)
+            df_1 = primer_df.copy()
+            df_1 = clean_columns_padron(df_1)
+            print('datos lado 1')
             return [dmc.Text(f"{df_1.shape[0]}", weight=700),
-                    dmc.Text(f"Sin carga"),
+                    dmc.Text(f""),
                     dag.AgGrid(
                         id="get-started-example-basic-df",
                         rowData=df_1.to_dict("records"),
                         columnDefs=[{"field": i} for i in df_1.columns],
                     ),
                     dmc.Text(f"Sin tabla"),
+                    df_1.to_dict('series')
                     
             ]
         elif upload_1 == None and upload_2 != None:
             content_string_2 = upload_2.split(',')[1]
             second_decoded = base64.b64decode(content_string_2)
             segundo_df = pd.read_excel(io.BytesIO(second_decoded),skiprows=4)
-            df_2=clean_padron(segundo_df)
-            
-            return [dmc.Text(f"Sin carga"),
+            #df_2=clean_padron(segundo_df)
+            df_2 = segundo_df.copy()
+            df_2 = clean_columns_padron(df_2)
+            print('datos lado 2')
+            return [dmc.Text(f""),
                     dmc.Text(f"{df_2.shape[0]}"),
                     dmc.Text(f"Sin tabla"),
                     dag.AgGrid(
@@ -109,6 +119,7 @@ def dash_carga_padron():
                         rowData=df_2.to_dict("records"),
                         columnDefs=[{"field": i} for i in df_2.columns],
                     ),
+                    df_2.to_dict('series')
                     
                 ]
         elif upload_1 != None and upload_2 != None:
@@ -119,15 +130,16 @@ def dash_carga_padron():
             first_decoded = base64.b64decode(content_string_1)
             second_decoded = base64.b64decode(content_string_2)
             primer_df = pd.read_excel(io.BytesIO(first_decoded),skiprows=4)
-            df_1=clean_padron(primer_df)
+            #df_1=clean_padron(primer_df)
+            df_1 = primer_df.copy()
+            df_1 = clean_columns_padron(df_1)
             segundo_df = pd.read_excel(io.BytesIO(second_decoded),skiprows=4)
-            df_2=clean_padron(segundo_df)
+            #df_2=clean_padron(segundo_df)
+            df_2 = segundo_df.copy()
+            df_2 = clean_columns_padron(df_2)
+            #padron_df._append(padron,ignore_index=True)
+            dff = df_1._append(df_2,ignore_index= True)
             
-            #dag.AgGrid(
-            #id="get-started-example-basic-df",
-            #rowData=dff.to_dict("records"),
-            #columnDefs=[{"field": i} for i in dff.columns],
-        #)
             return [dmc.Text(f"{df_1.shape[0]}"),
                     dmc.Text(f"{df_2.shape[0]}"),
                     dag.AgGrid(
@@ -140,15 +152,63 @@ def dash_carga_padron():
                         rowData=df_2.to_dict("records"),
                         columnDefs=[{"field": i} for i in df_2.columns],
                     ),
+                    dff.to_dict('series')
             ]
-
+            
+    @app.callback(
+                Output('alert', 'children'),
+                Input('data-value','data'),
+                Input('btn-guardar-data','n_clicks'),
+                
+                )
+    def update_save( data,n_clicks_guardar):
+            try:
+                df = pd.DataFrame(data)
+                
+                if n_clicks_guardar:
+                    #cargarDataPadron
+                    df['Fecha_Carga'] = datetime.datetime.now()
+                    print(df)
+                    schema_df = [{'name': i , 'type': 'STRING'} for i in df.columns]
+                    cargarDataPadron(df,None)
+                    return Div(content=[dmc.Alert("Se almaceno correctamente nuevamente",title="Correcto :",color="blue",duration=5000)])
+                    """
+                    print('aqui estoy cuy')
+                    if os.path.exists('p_data.parquet'):
+                        data_parquet_df = pd.read_parquet('p_data.parquet', engine='pyarrow')
+                        df['Fecha de Carga'] = str(datetime.datetime.now())
+                        dff = data_parquet_df._append(df,ignore_index=True)
+                        #print(dff.info())
+                        dff.to_parquet('p_data.parquet')
+                        return Div(content=[dmc.Alert("Se almaceno correctamente nuevamente",title="Correcto :",color="blue",duration=5000)])
+                    else:
+                        
+                        df['Fecha de Carga'] = str(datetime.datetime.now())
+                        #print(df.info())
+                        df.to_parquet('p_data.parquet')
+                        return Div(content=[dmc.Alert("Se almaceno correctamente",title="Correcto :",color="blue",duration=5000)])
+                    """
+            except:
+                return Div(content=[dmc.Alert("No existen datos para almacenar",title="Error :",color="red",duration=5000)])
+            
+            
+"""
+if n_click_guardar:
+            if upload_1 == None and upload_2 == None:
+            #
+                alerta = dmc.Alert("No olvide ingresar la data",title="Error :",color="red",duration=5000)
+            elif upload_1 != None and upload_2 == None:
+                if os.path.exists('p_data.parquet'):
+                    data_parquet_df = pd.read_parquet('p_data.parquet', engine='pyarrow')
+                    data_parquet_df._append(meta_df,ignore_index=True) 
+"""
 
 def dash_padron_nominal():
     app = DjangoDash('padron-general',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([
         Row([
             Column([title(content='Padrón Nominal',order=1)],size=4),
-            Column([multiSelect(id='multiselect-year',texto='Años',data = padron_anio_list)],size=3),
+            Column([multiSelect(id='multiselect-year',texto='Años',data = [])],size=3),
             Column([select(id='select-eess',texto='EESS de Atención',searchable=True)],size=3),
             Column([select(id='select-entidadUpdate',texto='Entidad Actualiza Registro',searchable=True)],size=2),
         
@@ -204,6 +264,7 @@ def dash_padron_nominal():
         Div(id='notifications-update-data'),
         Store(id='data-values'),
     ])
+    """
     @app.callback(
                     Output('select-eess','data'),
                     Output('select-entidadUpdate','data'),
@@ -289,3 +350,4 @@ def dash_padron_nominal():
                              xaxis_title='N° de Niños',
                              yaxis_title='Establecimiento de Salud'
         )
+        """

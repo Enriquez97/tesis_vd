@@ -21,3 +21,7 @@
 .upload-text {
     color: rgb(134, 142, 150)
 }
+
+.mantine-Tabs-tab[data-active="true"] {
+    background-color: blue; 
+}

@@ -61,16 +61,12 @@ def pie_figure(df = pd.DataFrame(),label_col = '',
              height = 400, showlegend = True, color_list = [], textfont_size = 12
              
     ):
-        if dict_color != None:
-            marker_colors = [dict_color[i]for i in df[label_col]] if type(dict_color) == dict else list_or_color
-        elif color_list != None  and dict_color == None:
-            marker_colors = color_list
-        elif color_list == None  and dict_color == None:
-              marker_colors = px.colors.qualitative.Plotly 
+        
         figure = go.Figure()
         figure.add_trace(
             go.Pie(labels=df [label_col],values=df[value_col],
-                marker_colors = marker_colors,
+                
+                marker_colors = list_or_color,
                 #hovertemplate='<br><b>'+label_col+': %{labels}</b><br><b>'+value_col+': %{value:,.2f}</b>'
                 hoverlabel=dict(font_size=15,bgcolor="white"),
                 hovertemplate = "<b>%{label}</b> <br>Porcentaje:<b> %{percent} </b></br>Total: <b>%{value}</b>",
@@ -94,7 +90,8 @@ def pie_figure(df = pd.DataFrame(),label_col = '',
 def bar_go_figure(df = pd.DataFrame(), x = '', y = '', text = '', orientation = 'v', height = 400 ,
         title = '', space_ticked = 130, xaxis_title = '',yaxis_title = '', showticklabel_x = True, 
         showticklabel_y = True , color_dataframe= '#145f82',list_or_color = None, customdata = [],
-        template = 'plotly_white', size_tickfont = 11, title_font_size = 20, clickmode = False
+        template = 'plotly_white', size_tickfont = 11, title_font_size = 20, clickmode = False,
+        list_colors = []
     ):  
         #print(df)
         figure = go.Figure()
@@ -132,9 +129,9 @@ def bar_go_figure(df = pd.DataFrame(), x = '', y = '', text = '', orientation = 
                    
                    orientation = orientation,
                    textposition = 'outside',
-                   texttemplate =' %{text:.2s}',
+                   #texttemplate =' %{text:.2s}',
                    #marker_color = [DICT_CULTIVOS_COLOR[i]for i in df[color_dataframe]] if color_dataframe == 'CULTIVO' else value_colors,    
-                  # marker_color = value_colors,
+                   marker_color = list_colors,
                    opacity=0.9,
                    name = '',
                    customdata = custom,
@@ -162,8 +159,8 @@ def bar_go_figure(df = pd.DataFrame(), x = '', y = '', text = '', orientation = 
         if clickmode == True:
             figure.update_layout(clickmode='event+select')
         size_list = len(df[x].unique()) if orientation == 'v' else len(df[y].unique())
-        figure.update_xaxes(tickfont=dict(size=size_tickfont),color='rgba(0, 0, 0, 0.7)',showticklabels = showticklabel_x,title_font_family="sans-serif",title_font_size = 13,automargin=True)#,showgrid=True, gridwidth=1, gridcolor='black',
-        figure.update_yaxes(tickfont=dict(size=size_tickfont),color='rgba(0, 0, 0, 0.7)',showticklabels = showticklabel_y,title_font_family="sans-serif",title_font_size = 13,automargin=True)  
+        figure.update_xaxes(tickfont=dict(size=size_tickfont),color='black',showticklabels = showticklabel_x,title_font_family="sans-serif",title_font_size = 13,automargin=True)#,showgrid=True, gridwidth=1, gridcolor='black',
+        figure.update_yaxes(tickfont=dict(size=size_tickfont),color='black',showticklabels = showticklabel_y,title_font_family="sans-serif",title_font_size = 13,automargin=True)  
         figure.update_layout(margin=dict(l = value_left, r = 40, b= value_bottom, t = 40, pad = 1))
         
         if  size_list== 1:

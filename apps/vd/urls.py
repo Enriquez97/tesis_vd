@@ -8,5 +8,11 @@ urlpatterns = [
         path("padron", views.dashboard_padron_general, name="padron_dash"),
         path("carga-compromiso", views.carga_compromiso, name="carga_compromiso"),
         path("compromiso", views.dashboard_compromiso_general, name="compromiso_dash"),
+        path("unir-data", views.concatenar_data, name="concatenar_data"),
+        path("extraer-data-padron", views.extraer_data_padron, name="extraer_data_padron"),
         
+        
+        path("ingesta-any", views.ingesta_any, name="ingesta_any"),
+        path("dashboard-seguimiento", views.dashboard_seguimiento_indicadores, name="dashboard_seguimiento"),
+        path("analisis-report-vd", views.dashboard_analisis_inicio_vd, name="analisis_vd"),
 ]

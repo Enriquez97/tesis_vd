@@ -80,3 +80,33 @@ def cardGraph(
                                     )
                 ])
                 
+def cardSection(id_value = '',shadow='xl', radius='md', border =  True, text = '', num = 0, color_text ='white',color_section_title = '#0d6efd',contenido ='numero', content = [], padding_section=5,color_section_content = 'white', icon =''):
+    if contenido == 'numero':
+            section =  dmc.Text(children=[dmc.Center(children=num,id=id_value)], weight=500, style={"fontSize": 30})
+                            
+    elif contenido == 'tabla':
+            section = content
+                        
+                    
+    return dmc.Card(
+            children=[
+                dmc.CardSection(
+                    children=[
+                            
+                            dmc.Text(children =[dmc.Center(children=[DashIconify(icon=icon, width=25,className="me-1"),text])] , weight=500, color=color_text),
+                    ],
+                    withBorder=True,
+                    inheritPadding=True,
+                    p = 3,
+                    style={'backgroundColor':color_section_title},
+                    
+                    #py="xs",
+                    #bg = "blue"
+                ),
+                dmc.CardSection(children = section,p=padding_section,style={'backgroundColor':color_section_content}),
+            ],
+            withBorder = border,
+            shadow = shadow,
+            radius = radius,
+
+        )

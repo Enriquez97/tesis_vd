@@ -4,8 +4,8 @@ from dash_iconify import DashIconify
 import dash_bootstrap_components as dbc
 from datetime import datetime, date, timedelta
 
-def title(order = 2, align = 'center', content = '' ):
-    return dmc.Title(children = content,order = order,align = align)
+def title(order = 2, align = 'center', content = '',id = '-' ):
+    return dmc.Title(children = content,order = order,align = align, id = id)
 
 def offcanvas(
         componentes=[], label='', size_width=250, placement = "start"
@@ -68,10 +68,10 @@ def modalMaximize(content=[]):
 def text(id = '', text = '',weight = 800, align = "center"):
         return dmc.Text(text, weight=weight,align=align)
 
-def button(text="",variant="filled",color="indigo",id='btn'):
+def button(text="",variant="filled",color="blue",id='btn',fullwidth = False, margin = {}):
         return html.Div(
                 [
-                    dmc.Button(text,variant=variant,color=color,id=id),
+                    dmc.Button(text,variant=variant,color=color,id=id, fullWidth= fullwidth,style = margin),
                 ]
             )
         
@@ -208,7 +208,7 @@ def radioGroup(
                     ]
                 )
 
-def select(id='',texto='',place="Todos",value=None,data=[],clearable=True, searchable = False, size='md'):
+def select(id='',texto='',place="Seleccione",value=None,data=[],clearable=True, searchable = False, size='md'):
         return  html.Div(
             dmc.Select(
                 id=id,
@@ -252,17 +252,18 @@ def segmented(id='',value=None,data=[],full_width=True,color='rgb(34, 184, 207)'
         ])   
 
 
-def upload(upload_id = 'upload-data', stack_id = 'contents'):
+def upload(upload_id = 'upload-data', stack_id = 'contents', text_btn = ''):
     return dcc.Upload(
             id = upload_id,
             children=loadingOverlay([dmc.Stack(id = stack_id, 
                     children=[
-                        html.I(className='fas fa-upload fa-fw fa-3x upload-icon'),
-                        dmc.Text('Arrastre y suelte archivos aquí para cargarlos.', className='upload-text'),
+                        #html.I(className='fas fa-upload fa-fw fa-3x upload-icon'),
+                        #dmc.Text('Arrastre y suelte archivos aquí para cargarlos.', className='upload-text'),
                         dmc.Button(
-                            "Seleccione Archivo",
+                            text_btn,
                             id='upload-button',
                             radius='lg',
+                            color='gray'
                         )
                     ], align='center', spacing='xl')
                     ])

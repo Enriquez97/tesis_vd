@@ -2,8 +2,13 @@ import pandas as pd
 import numpy as np
 import os
 
-
-def documento_unique(cnv , cui, dni, tipo):
+def nueva_col_dni(dni_meta, dni_padron):
+    if len(dni_meta)!= 0:
+        return dni_meta
+    elif (len(dni_meta)== 0 or dni_meta=='XXXXXXX') and len(dni_padron)!=0:
+        return  dni_padron
+    
+def documento_unique(cnv , cui, dni, cod, tipo):
         if dni !=0:
             resultado = dni
             doc = 'DNI'
@@ -13,9 +18,12 @@ def documento_unique(cnv , cui, dni, tipo):
         elif cui == 0 and dni == 0 and cnv !=0:
             resultado = cnv
             doc = 'CNV'
-        else:
-            resultado = 11111
-            doc = 'SIN DOC'
+        elif cui == 0 and dni == 0 and cnv ==0:
+            resultado = cod
+            doc = 'CODIGO PADRON'
+        #else:
+        #    resultado = 11111
+        #    doc = 'SIN DOC'
         
         return resultado if tipo == 'DOC' else doc
     
