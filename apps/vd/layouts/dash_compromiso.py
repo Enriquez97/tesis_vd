@@ -363,7 +363,7 @@ def  dashboard_indicadores_vd():
         ]),
         Row([
             Column([
-                Div(id='table-consecutivo')
+                Div(id='table-consecutivo',)
                 #loadingOverlay(cardGraph(id_graph = 'bar-eess', id_maximize = 'maximize-bar-eess',height=400))
             ],size=8),
             #Column([
@@ -451,9 +451,9 @@ def  dashboard_indicadores_vd():
                         },
                         #rowClassRules={"bg-primary fw-bold": "['TOTAL'].includes(params.data.Periodo)"},
                         className="ag-theme-alpine headers1",
-                        dashGridOptions = {"domLayout": "autoHeight"},
+                        #dashGridOptions = {"domLayout": "autoHeight"},
                         #getRowId="params.data.State",
                         columnSize="sizeToFit",
-                        style={"height": None}
+                        style={"height": 400}
                     )])
         return fig, table_ddd
