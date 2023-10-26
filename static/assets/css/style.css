@@ -827,7 +827,6 @@ aside.left-panel {
 /* Right panel */
 .right-panel {
   background: white;
-  margin-left: 280px;
   margin-top: 55px; }
   .right-panel .top-left {
     width: 350px;

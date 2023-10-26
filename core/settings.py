@@ -95,16 +95,22 @@ ASGI_APPLICATION='core.routing.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':  'vd_tesis',
+        'NAME':  'dashboard_vd',
         'USER':'root',
-        'PASSWORD':'3J;f]iJ6j=",P\^b',
-        'HOST': '34.171.252.185',
-        'PORT':'3306'
+        'PASSWORD':'H6bB3h4ac53DHD4a3e13cAHG-46D2aAc',
+        'HOST': 'viaduct.proxy.rlwy.net',
+        'PORT':'20730'
     }
     #'default': {
-    #    'ENGINE': 'django.db.backends.sqlite3',
-    #    'NAME': BASE_DIR / 'db.sqlite3',
+    #    'ENGINE': 'django.db.backends.mysql',
+    #    'NAME':  'vd_tesis',
+    #    'USER':'root',
+    #    'PASSWORD':'3J;f]iJ6j=",P\^b',
+    #    'HOST': '34.171.252.185',
+    #    'PORT':'3306'
     #}
+    
+
 }
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
