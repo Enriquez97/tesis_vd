@@ -57,28 +57,29 @@ def dash_home():
     app.layout = Container([
         Row([
             Column([
-                card_index(img = image_download,title_card= "Descargar Data",url = '/test')
-            ], size=4),
-            Column([
+                #card_index(img = image_download,title_card= "Descargar Data",url = '/test')
                 card_index(img = image_ingesta,title_card= "Ingesta de Datos",url = '/ingesta-any')
-            ], size=4),
+            ], size=3),
             Column([
                 card_index(img = image_organizar,title_card= "Organización de VD", url = '/unir-data')
-            ], size=4),
-            #Column([
-                
-            #], size=3),
+            ], size=3),
+            Column([
+                card_index(img = image_vd,title_card= "Dashboard de Visitas Domiciliarias",url = '/vd_detalle_resultados')
+            ], size=3),
+            Column([
+                card_index(img = image_seguimiento,title_card= "Análisis VD con Padrón", url= '/analisis-report-vd')
+            ], size=3),
         ]),
         Row([
             Column([
-                card_index(img = image_vd,title_card= "Dashboard de Visitas Domiciliarias",url = '/vd_detalle_resultados')
-            ], size=4),
+                card_index(img = '',title_card= "Seguimiento Visitas Oportunas", url = '/vd-oportunas')
+            ], size=3),
             Column([
-                card_index(img = image_seguimiento,title_card= "Dashboard de Revisión de Niños Buscados", url= '/analisis-report-vd')
-            ], size=4),
+                card_index(img = '',title_card= "Seguimiento Visitas Consecutivas", url = '/vd-consecutivas')
+            ], size=3),
             Column([
-                #card_index(img = image_organizar,title_card= "Organización de VD", url = '/unir-data')
-            ], size=4),
+                card_index(img = '',title_card= "Seguimiento Visitas Georreferenciadas", url = '/vd-oportunas')
+            ], size=3),
             #Column([
                 #card_index(img = image_seguimiento,title_card= "Dashboard de Seguimiento", url= '/dashboard-seguimiento')
             #], size=3),

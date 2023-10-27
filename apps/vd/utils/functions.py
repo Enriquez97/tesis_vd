@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import datetime
 
 def nueva_col_dni(dni_meta, dni_padron):
     if len(dni_meta)!= 0:
@@ -101,3 +102,76 @@ def calcular_total_vd(dataframe = None):
                 vd_detalle_periodo=dataframe[dataframe['Periodo de Visita']==periodo]
                 acumulador+=vd_detalle_periodo.groupby(['Número de Documento','Numeró de Visitas Completas']).count().reset_index()['Numeró de Visitas Completas'].sum()
             return acumulador
+        
+
+def periodos_list():
+    mes_num = int(str(datetime.datetime.now())[5:7])
+    Mes=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic']
+    lista_end = Mes[6:-(12-mes_num)]
+    return lista_end
+
+
+def completar_segun_periodo(dataframe = None, dataframe_historico = None, tipo = 'carga'):
+    lista_drop = ['Fecha_Carga','Periodo_VD'] if tipo =='carga'else ['Fecha_Carga'] 
+    filtro_campo = 'Mes_Periodo' if tipo =='carga'else 'Mes_VD'
+    mes_num = int(str(datetime.datetime.now())[5:7])
+    Mes=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic']
+    mes_dict = dict(zip(range(1,13),Mes))
+    try:
+        mes_text_now = mes_dict[mes_num]
+        vd_dff_mes_now = dataframe[(dataframe[filtro_campo]==mes_text_now)]
+        vd_dff_mes_last = vd_dff_mes_now[vd_dff_mes_now['Fecha_Carga']==(vd_dff_mes_now['Fecha_Carga'].max())]
+        vd_dff_mes_last = vd_dff_mes_last.drop(lista_drop, axis=1)
+        return dataframe_historico._append(vd_dff_mes_last,ignore_index=True)
+    except:
+        return dataframe_historico
+
+def data_vd(dataframe = None, dataframe_carga = None):
+    def estado_visita(x,y,z):
+        if x <= y and x >= z:
+            return 'Visita Oportuna'
+        elif x == y and x != z:
+            return 'Visita Incompleta'
+        elif x>y and x!=z:
+            return 'Visita Inválida'
+    dataframe['Fecha_Intervencion'] = dataframe['Fecha_Intervencion'].apply(lambda a: pd.to_datetime(a).date())
+    list_doc_num = list(dataframe['Numero_Doc_Nino'].unique())
+    data_vd_df = pd.DataFrame()
+    list_doc =[]
+    list_primera_fecha = []
+    list_segunda_fecha = []
+    list_tercera_fecha = []
+    list_num_visitas = []
+    list_num_vd_valida = []
+    for doc in list_doc_num:
+
+        list_doc.append(doc)
+        tr_dff = dataframe[dataframe['Numero_Doc_Nino']==doc]
+        list_num_vd_valida.append(tr_dff['VD_Valida'].sum())
+        list_fecha_inter =sorted(list(tr_dff['Fecha_Intervencion'].unique()))
+        len_fecha_inter = len(list(tr_dff['Fecha_Intervencion'].unique()))
+        if len_fecha_inter == 1:
+            list_primera_fecha.append(list_fecha_inter[0])
+            list_segunda_fecha.append('-')
+            list_tercera_fecha.append('-')
+            list_num_visitas.append(len_fecha_inter)
+        elif len_fecha_inter == 2:
+            list_primera_fecha.append(list_fecha_inter[0])
+            list_segunda_fecha.append(list_fecha_inter[1])
+            list_tercera_fecha.append('-')
+            list_num_visitas.append(len_fecha_inter)
+        elif len_fecha_inter == 3:
+            list_primera_fecha.append(list_fecha_inter[0])
+            list_segunda_fecha.append(list_fecha_inter[1])
+            list_tercera_fecha.append(list_fecha_inter[2])
+            list_num_visitas.append(len_fecha_inter)
+    data_vd_df['Numero_Doc_Nino'] = list_doc
+    data_vd_df['Numero_visitas'] = list_num_visitas
+    data_vd_df['Numero_visitas_validas'] = list_num_vd_valida
+    data_vd_df['Primera Visita'] = list_primera_fecha
+    data_vd_df['Segunda Visita'] = list_segunda_fecha
+    data_vd_df['Tercera Visita'] = list_tercera_fecha
+    dfff =  data_vd_df.merge(dataframe_carga,how ='inner', on = 'Numero_Doc_Nino')
+    dfff['Estado_Visita'] = dfff.apply(lambda x: estado_visita(x['Numero_visitas'], x['Numero_visitas_validas'],x['Numero_de_Visitas_Completas']),axis=1)
+    #.apply(lambda x: semana_text(x['Año'], x['Semana_']),axis=1)
+    return dfff

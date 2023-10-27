@@ -16,6 +16,8 @@ urlpatterns = [
         path("dashboard-seguimiento", views.dashboard_seguimiento_indicadores, name="dashboard_seguimiento"),
         path("analisis-report-vd", views.dashboard_analisis_inicio_vd, name="analisis_vd"),
         path("vd_detalle_resultados", views.dashboard_resultados_indicadores, name="vd_detalle_resultados"),
-
+        
+        path("vd-oportunas", views.dashboard_indicador_vd_oportunas, name="vd_oportunas"),
+        path("vd-consecutivas", views.dashboard_indicador_vd_consecutivas, name="vd_consecutivas"),
         #
 ]

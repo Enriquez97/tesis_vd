@@ -5,7 +5,7 @@ from apps.vd.layouts.dash_compromiso import dash_carga_compromiso,dash_compromis
 from apps.vd.layouts.dash_general import dash_concatenar_data,dashboard_reporteVD_
 from apps.vd.layouts.dash_extraccion_data import dash_extraer_padron
 from ..vd.layouts.layouts_ingesta import dash_ingestas
-from ..vd.layouts.layouts_indicadores import dash_indicador_resultados
+from ..vd.layouts.layouts_indicadores import *
 from ..vd.layouts.inicio import dash_home
 @login_required
 def home(request):
@@ -70,3 +70,13 @@ def dashboard_analisis_inicio_vd(request):
 def dashboard_resultados_indicadores(request):
     context = {'dashboad':dash_indicador_resultados()}
     return render(request, 'Dashboards/vd_detalle_resultados.html',context)
+
+@login_required
+def dashboard_indicador_vd_oportunas(request):
+    context = {'dashboad':dash_indicador_vd_oportunas()}
+    return render(request, 'Dashboards/indicador_vd_oportunas.html',context)
+
+@login_required
+def dashboard_indicador_vd_consecutivas(request):
+    context = {'dashboad':dash_indicador_vd_consecutivas()}
+    return render(request, 'Dashboards/indicador_vd_consecutivas.html',context)
