@@ -80,3 +80,7 @@ def dashboard_indicador_vd_oportunas(request):
 def dashboard_indicador_vd_consecutivas(request):
     context = {'dashboad':dash_indicador_vd_consecutivas()}
     return render(request, 'Dashboards/indicador_vd_consecutivas.html',context)
+
+def dashboard_indicador_vd_georreferenciadas(request):
+    context = {'dashboad':dash_indicador_vd_georreferenciadas()}
+    return render(request, 'Dashboards/indicador_vd_geo.html',context)

@@ -527,3 +527,153 @@ def dash_indicador_vd_consecutivas():
                                 ),
             figure_bar_px(df = vd_df_eess_mes ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = 'Mes_VD', titulo = 'Número de Visitas por Periodo',showticklabels_x=True,bottom=20,top=85,height=350),
         ]
+
+def dash_indicador_vd_georreferenciadas():
+    #historico
+    historico_vd_df=bq_historico_carga_vd()
+    vd_carga_dff = bq_cvd_df()
+    #
+    cvd_detalle_df = bq_cvd_detalle_df()
+    cvd_reporte_df = bq_cvd_reporte_df() 
+    
+    periodos = periodos_list()
+    app = DjangoDash('vd_geo',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
+    app.css.append_css({ "external_url" : "/static/assets/css/dashstyle.css" })
+    app.layout = Container([
+        Row([
+            Column([
+                title(content = 'Seguimiento de Visitas Domiciliarias Georreferenciadas',id = 'ti',order=1) 
+            ],size=12),
+            
+        ]),
+        Row([
+            
+            Column([
+                multiSelect(id='select-eess',texto='Establecimiento de Salud',data=cvd_detalle_df['Establecimito_Salud_Meta'].unique(),place='Seleccione EESS')
+            ],size=6),
+            Column([
+                select(id='select-as',texto='Actor Social')
+            ],size=4),
+            Column([
+                select(id='select-periodo',texto='Periodo',data=periodos,clearable=True )
+            ],size=2)
+            
+        ]),
+        Row([
+            #Column([cardSection(text='Total de Niños Evaluados',radius='xs',id_value='card-total-evaluados')],size=2),
+            Column([cardSection(text='Total Niños Cargados',radius='xs',id_value='card-total-cargados')],size=3),
+            Column([cardSection(text='Total Visitas Completas',radius='xs',id_value='card-total-vd')],size=3),
+            Column([cardSection(text='Total Visitas Georreferenciadas',radius='xs',id_value='card-total-geo')],size=3),
+            Column([cardSection(text='% Visitas Georreferenciadas',radius='xs',id_value='card-porcentaje-geo')],size=3),
+            #Column([cardSection(text='Total Visitas Realizadas Válidas',radius='xs',id_value='card-total-vdrv')],size=2),
+        ]),
+        Row([
+            Column([
+                loadingOverlay(cardGraph(id_graph = 'map-vd', id_maximize = 'maximize-map-vd',height=350))
+            ],size=6),
+            Column([
+                loadingOverlay(cardGraph(id_graph = 'bar-vd-dispositivo', id_maximize = 'maximize-bar-vd-dispositivo',height=350))
+            ],size=3),
+            Column([
+                 loadingOverlay(cardGraph(id_graph = 'pie-etapa-vd', id_maximize = 'maximize-pie-etapa-vd',height=350))
+            ],size=3),
+        ]),
+    ])
+    @app.callback(               
+                #Output('select-eess','data'),
+                #Output('select-dispositivo','data'),
+                Output('select-as','data'),
+                Output('data-vd-completas','data'),
+                Output('data-values','data'),
+                Output("notifications-update-data","children"),
+                Input('select-periodo','value'),
+                Input('select-eess','value'), 
+                Input('select-as','value'),         
+    )
+    def update_filters(periodo,eess,actor_social):#
+        historico_carga_dff = completar_segun_periodo(dataframe = vd_carga_dff, dataframe_historico = historico_vd_df)
+        historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = cvd_detalle_df, tipo = 'vd')
+        if periodo == None:
+            historicof_carga_dff = historico_carga_dff.copy()
+            historicof_vd_dff = historico_vd_dff.copy()
+        else:
+            historicof_carga_dff = historico_carga_dff[historico_carga_dff['Mes_Periodo']==periodo]
+            historicof_vd_dff = historico_vd_dff[historico_vd_dff['Mes_VD']==periodo]
+        
+        
+        vd_det_as_df=historicof_vd_dff.groupby(['Numero_Doc_Nino','Actor_Social'])[['Rango_de_Edad']].count().reset_index()
+        table_num_vd_completas = historicof_carga_dff.groupby(['Numero_Doc_Nino','Establecimito_Salud_Meta'])[['Numero_de_Visitas_Completas']].sum().reset_index()
+        table_num_vd_completas = table_num_vd_completas.merge(vd_det_as_df,how ='left', on = 'Numero_Doc_Nino').fillna('No Especificado')
+        #vd_df = vd_detalle_df[vd_detalle_df['Fecha_Carga']==carga]
+        if (eess == None or len(eess) == 0) and actor_social == None:
+            filt_df = historicof_vd_dff.copy()
+            filt_table = table_num_vd_completas.copy()
+        elif eess != None and actor_social == None:
+            filt_df = historicof_vd_dff[historicof_vd_dff['Establecimito_Salud_Meta'].isin(eess)]
+            filt_table = table_num_vd_completas[table_num_vd_completas['Establecimito_Salud_Meta'].isin(eess)]
+        elif (eess == None or len(eess) == 0) and actor_social != None:
+            filt_df = historicof_vd_dff[historicof_vd_dff['Actor_Social']==actor_social]
+            filt_table = table_num_vd_completas[table_num_vd_completas['Actor_Social']==actor_social]
+        elif eess != None and actor_social != None:
+            filt_df = historicof_vd_dff[(historicof_vd_dff['Establecimito_Salud_Meta'].isin(eess))&(historicof_vd_dff['Actor_Social']==actor_social)]
+            filt_table = table_num_vd_completas[(table_num_vd_completas['Establecimito_Salud_Meta'].isin(eess))&(table_num_vd_completas['Actor_Social']==actor_social)]
+        return [
+            [{'label': i, 'value': i} for i in filt_df['Actor_Social'].unique()],
+            filt_table.to_dict('series'),
+            #[{'label': i, 'value': i} for i in vd_df['Dispositivo Intervención'].unique()],
+            filt_df.to_dict('series'),
+            notification(text=f'Se cargaron {len(filt_df)} filas',title='Update')
+        ]
+    @app.callback(               
+                
+                #
+                Output('card-total-cargados','children'),
+                Output('card-total-vd','children'),
+                Output('card-total-geo','children'),
+                Output('card-porcentaje-geo','children'),
+                
+                
+                #Output('map-vd','figure'),
+                #$Output('pie-consecutivo','figure'),
+                #Output('pie-eess_vd','figure'),
+                
+                
+               
+                Input('data-vd-completas','data'),
+                Input('data-values','data'),       
+    )
+    def update_data(data_table,data):
+        table_num_vd_completas = pd.DataFrame(data_table)
+        df = pd.DataFrame(data)
+        print(table_num_vd_completas)
+        
+        total_ninos_cargados = table_num_vd_completas['Numero_Doc_Nino'].count()
+        total_ninos_vd = table_num_vd_completas['Numero_de_Visitas_Completas'].sum()
+        
+        total_vd_realizadas = df['VD_Valida'].sum()
+        total_geo = df[(df['Dispositivo_Intervencion']=='MOVIL')&(df['Estado_Intervencion_VD']=='Registrado')]['Dispositivo_Intervencion'].count()
+        porcentaje = f"{round((total_geo/total_vd_realizadas)*100)}%"#
+        #promedio_eess = round(total_vd_realizadas/len(df['Establecimito_Salud_Meta'].unique()))
+        df['Latitud_Intervencion']=df['Latitud_Intervencion'].fillna(0)
+        df['Longitud_Intervencion']=df['Longitud_Intervencion'].fillna(0)
+        geo_df = df[df['Latitud_Intervencion']!= 0]
+        fig = px.scatter_mapbox(
+                    geo_df,
+                    lat="Latitud_Intervencion",
+                    lon="Longitud_Intervencion",
+                    hover_name="Establecimito_Salud_Meta",
+                    hover_data=["Actor_Social", "Nombres_del_Nino"],
+                    #color_discrete_map =dict_eess,
+                    zoom=12,
+                    height=400,
+                )
+        fig.update_layout(mapbox_style="open-street-map")
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        
+        return[
+            total_ninos_cargados,
+            total_ninos_vd,
+            total_geo,
+            porcentaje,
+            #fig
+        ]

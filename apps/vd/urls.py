@@ -19,5 +19,6 @@ urlpatterns = [
         
         path("vd-oportunas", views.dashboard_indicador_vd_oportunas, name="vd_oportunas"),
         path("vd-consecutivas", views.dashboard_indicador_vd_consecutivas, name="vd_consecutivas"),
+        path("vd-georreferenciadas", views.dashboard_indicador_vd_georreferenciadas, name="vd_georreferenciadas"),
         #
 ]

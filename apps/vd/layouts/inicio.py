@@ -72,17 +72,17 @@ def dash_home():
         ]),
         Row([
             Column([
-                card_index(img = '',title_card= "Seguimiento Visitas Oportunas", url = '/vd-oportunas')
+                card_index(img = 'https://allinkawsay.ins.gob.pe/wp-content/uploads/2020/09/visita-domiciliaria.jpg',title_card= "Seguimiento Visitas Oportunas", url = '/vd-oportunas')
             ], size=3),
             Column([
-                card_index(img = '',title_card= "Seguimiento Visitas Consecutivas", url = '/vd-consecutivas')
+                card_index(img = 'https://img.freepik.com/vector-gratis/ilustracion-concepto-mensajero_114360-1156.jpg?size=338&ext=jpg&ga=GA1.1.386372595.1697760000&semt=ais',title_card= "Seguimiento Visitas Consecutivas", url = '/vd-consecutivas')
             ], size=3),
             Column([
-                card_index(img = '',title_card= "Seguimiento Visitas Georreferenciadas", url = '/vd-oportunas')
+                card_index(img = 'https://esarco.es/wp-content/uploads/2020/05/certificado-coordenadas-georreferenciadas.png',title_card= "Seguimiento Visitas Georreferenciadas", url = '/vd_georreferenciadas')
             ], size=3),
-            #Column([
-                #card_index(img = image_seguimiento,title_card= "Dashboard de Seguimiento", url= '/dashboard-seguimiento')
-            #], size=3),
+            Column([
+                card_index(img = 'https://previews.123rf.com/images/lembergvector/lembergvector2112/lembergvector211200033/178732022-proceso-de-medici%C3%B3n-de-indicadores-clave-de-desempe%C3%B1o-de-la-empresa-resultados-estrat%C3%A9gicos-y.jpg',title_card= "Seguimiento Visitas Resultados", url= '/dashboard-seguimiento')
+            ], size=3),
         ]),
     
     ])
