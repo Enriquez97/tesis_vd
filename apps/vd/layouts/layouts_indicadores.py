@@ -570,14 +570,17 @@ def dash_indicador_vd_georreferenciadas():
         Row([
             Column([
                 loadingOverlay(cardGraph(id_graph = 'map-vd', id_maximize = 'maximize-map-vd',height=350))
-            ],size=6),
+            ],size=5),
             Column([
-                loadingOverlay(cardGraph(id_graph = 'bar-vd-dispositivo', id_maximize = 'maximize-bar-vd-dispositivo',height=350))
-            ],size=3),
+                loadingOverlay(cardGraph(id_graph = 'pie-dispositivo', id_maximize = 'maximize-pie-dispositivo',height=350))
+            ],size=2),
             Column([
-                 loadingOverlay(cardGraph(id_graph = 'pie-etapa-vd', id_maximize = 'maximize-pie-etapa-vd',height=350))
-            ],size=3),
+                 loadingOverlay(cardGraph(id_graph = 'bar-eess-movil', id_maximize = 'maximize-bar-eess-movil',height=350))
+            ],size=5),
         ]),
+        Div(id='notifications-update-data'),
+        Store(id='data-vd-completas'),
+        Store(id='data-values'),
     ])
     @app.callback(               
                 #Output('select-eess','data'),
@@ -633,9 +636,9 @@ def dash_indicador_vd_georreferenciadas():
                 Output('card-porcentaje-geo','children'),
                 
                 
-                #Output('map-vd','figure'),
-                #$Output('pie-consecutivo','figure'),
-                #Output('pie-eess_vd','figure'),
+                Output('map-vd','figure'),
+                Output('pie-dispositivo','figure'),
+                Output('bar-eess-movil','figure'),
                 
                 
                
@@ -645,7 +648,7 @@ def dash_indicador_vd_georreferenciadas():
     def update_data(data_table,data):
         table_num_vd_completas = pd.DataFrame(data_table)
         df = pd.DataFrame(data)
-        print(table_num_vd_completas)
+        print(df.columns)
         
         total_ninos_cargados = table_num_vd_completas['Numero_Doc_Nino'].count()
         total_ninos_vd = table_num_vd_completas['Numero_de_Visitas_Completas'].sum()
@@ -669,11 +672,23 @@ def dash_indicador_vd_georreferenciadas():
                 )
         fig.update_layout(mapbox_style="open-street-map")
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-        
+        dispositivo_dff = df.groupby(['Dispositivo_Intervencion'])[['Numero_VD']].count().reset_index()
+        dff = df[(df['Dispositivo_Intervencion']=='MOVIL')&(df['Estado_Intervencion_VD']=='Registrado')]
+        eess_movil_dff = dff.groupby(['Establecimito_Salud_Meta'])[['Numero_VD']].count().sort_values('Numero_VD').reset_index()
         return[
             total_ninos_cargados,
             total_ninos_vd,
             total_geo,
             porcentaje,
-            #fig
+            fig,
+            pie_figure(df=dispositivo_dff,
+                                label_col='Dispositivo_Intervencion', 
+                                value_col='Numero_VD',
+                                height=350, 
+                                showlegend=False,
+                                title= 'Dispositivo de Intervención',
+                                textposition = 'inside',
+                                list_or_color=px.colors.qualitative.T10
+                                ),
+             figure_bar_px(df = eess_movil_dff ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = None, titulo = 'Visitas por Dispositivo Movil',showticklabels_x=True,bottom=20,top=60,height=350),
         ]
