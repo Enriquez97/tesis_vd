@@ -14,7 +14,8 @@ from ..utils.figures import *
 from ..utils.global_callback import callback_opened_modal
 
 
-def dash_indicador_resultados(dff = bq_cvd_reporte_df()):
+def dash_indicador_resultados():
+    dff = bq_cvd_reporte_df()
     vd_detalle_df = change_columns_vdetalle(df = dff)
     
     carga_list = vd_detalle_df['Fecha_Carga'].unique()
@@ -540,6 +541,9 @@ def dash_indicador_vd_georreferenciadas():
     app = DjangoDash('vd_geo',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.css.append_css({ "external_url" : "/static/assets/css/dashstyle.css" })
     app.layout = Container([
+        Modal(id="modal-map-vd", size= "90%"),
+        Modal(id="modal-pie-dispositivo", size= "90%"),
+        Modal(id="modal-bar-eess-movil", size= "90%"),
         Row([
             Column([
                 title(content = 'Seguimiento de Visitas Domiciliarias Georreferenciadas',id = 'ti',order=1) 
@@ -569,13 +573,13 @@ def dash_indicador_vd_georreferenciadas():
         ]),
         Row([
             Column([
-                loadingOverlay(cardGraph(id_graph = 'map-vd', id_maximize = 'maximize-map-vd',height=350))
+                loadingOverlay(cardGraph(id_graph = 'map-vd', id_maximize = 'maximize-map-vd',height=450))
             ],size=5),
             Column([
-                loadingOverlay(cardGraph(id_graph = 'pie-dispositivo', id_maximize = 'maximize-pie-dispositivo',height=350))
+                loadingOverlay(cardGraph(id_graph = 'pie-dispositivo', id_maximize = 'maximize-pie-dispositivo',height=450))
             ],size=2),
             Column([
-                 loadingOverlay(cardGraph(id_graph = 'bar-eess-movil', id_maximize = 'maximize-bar-eess-movil',height=350))
+                 loadingOverlay(cardGraph(id_graph = 'bar-eess-movil', id_maximize = 'maximize-bar-eess-movil',height=450))
             ],size=5),
         ]),
         Div(id='notifications-update-data'),
@@ -668,7 +672,7 @@ def dash_indicador_vd_georreferenciadas():
                     hover_data=["Actor_Social", "Nombres_del_Nino"],
                     #color_discrete_map =dict_eess,
                     zoom=12,
-                    height=400,
+                    height=450,
                 )
         fig.update_layout(mapbox_style="open-street-map")
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
@@ -684,11 +688,14 @@ def dash_indicador_vd_georreferenciadas():
             pie_figure(df=dispositivo_dff,
                                 label_col='Dispositivo_Intervencion', 
                                 value_col='Numero_VD',
-                                height=350, 
+                                height=450, 
                                 showlegend=False,
                                 title= 'Dispositivo de Intervención',
                                 textposition = 'inside',
                                 list_or_color=px.colors.qualitative.T10
                                 ),
-             figure_bar_px(df = eess_movil_dff ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = None, titulo = 'Visitas por Dispositivo Movil',showticklabels_x=True,bottom=20,top=60,height=350),
+             figure_bar_px(df = eess_movil_dff ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = None, titulo = 'Visitas por Dispositivo Movil',showticklabels_x=True,bottom=20,top=60,height=450),
         ]
+    callback_opened_modal(app, modal_id="modal-map-vd",children_out_id="map-vd", id_button="maximize-map-vd",height_modal = 900)
+    callback_opened_modal(app, modal_id="modal-pie-dispositivo",children_out_id="pie-dispositivo", id_button="maximize-pie-dispositivo",height_modal = 900)
+    callback_opened_modal(app, modal_id="modal-bar-eess-movil",children_out_id="bar-eess-movil", id_button="maximize-bar-eess-movil",height_modal = 900)

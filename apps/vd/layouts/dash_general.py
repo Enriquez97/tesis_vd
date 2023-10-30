@@ -8,7 +8,7 @@ from apps.vd.data.transformacion import *
 from apps.vd.utils.components import *
 from apps.vd.utils.cards import cardSection,cardGraph
 from apps.vd.utils.frames import Container,Div, Row ,Column, Store,Content,Download
-from apps.vd.data.lectura import bq_pnominal_df,bq_cvd_df,bq_cvd_detalle_df,bq_reporte_vd_df
+from apps.vd.data.lectura import *
 from apps.vd.data.ingesta import cargarDataVdReporte
 from apps.vd.utils.table import table_dag
 from apps.vd.utils.figures import bar_go_figure,pie_figure
@@ -48,14 +48,17 @@ def nueva_col_dni(dni_meta, dni_padron):
 
 def dash_concatenar_data():
     """"""
-    pnominal_bq_df= bq_pnominal_df()
-    cvd_bq_df = bq_cvd_df()
-    cvd_detalle_bq_df = bq_cvd_detalle_df()
+    pnominal_fcarga_bq_df = bq_fcarga_pnominal_df()
+    cvd_fcarga_bq_df = bq_fcarga_cvd_df()
+    cvd_fcarga_detalle_bq_df =bq_f_carga_cvd_detalle_df()
+    #pnominal_bq_df= bq_pnominal_df()
+    #cvd_bq_df = bq_cvd_df()
+    #cvd_detalle_bq_df = bq_cvd_detalle_df()
     """"""
     """"""
-    pnominal_fecha_carga = pnominal_bq_df['Fecha_Carga'].unique()
-    cvd_fecha_carga = cvd_bq_df['Fecha_Carga'].unique()
-    periodo_cvd_detalle = cvd_detalle_bq_df['Periodo_VD'].unique()
+    pnominal_fecha_carga = pnominal_fcarga_bq_df['Fecha_Carga'].unique()
+    cvd_fecha_carga = cvd_fcarga_bq_df['Fecha_Carga'].unique()
+    periodo_cvd_detalle = cvd_fcarga_detalle_bq_df['Periodo_VD'].unique()
     """"""
     
     app = DjangoDash('concatenar-data',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
@@ -130,6 +133,9 @@ def dash_concatenar_data():
     )
     def update_text_input(filter_pnominal, filter_cvd,filter_vd_detalle):#,btn_concatenar
         #if filter_pnominal != None:
+        pnominal_bq_df= bq_pnominal_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.pnominal`")
+        cvd_bq_df = bq_cvd_df()
+        cvd_detalle_bq_df = bq_cvd_detalle_df()
         pnominal_df = pnominal_bq_df[pnominal_bq_df['Fecha_Carga']==filter_pnominal]
         fecha_last_pnominal = str(max(pnominal_df['Fecha_creacion_registro'].unique()))[:10]
         cvd_df = cvd_bq_df[cvd_bq_df['Fecha_Carga']==filter_cvd]

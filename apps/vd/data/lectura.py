@@ -16,8 +16,8 @@ vd_detalle_df_bq = pd.read_gbq( query = query_sql_dt,project_id = 'ew-tesis',cre
 
 
 #PADRON NOMINAL
-def bq_pnominal_df():
-    query_data_pnominal = "SELECT * FROM `ew-tesis.dataset_tesis.pnominal`"
+def bq_pnominal_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.pnominal`"):
+    query_data_pnominal = query
     pnominal_bq_df = pd.read_gbq(   query = query_data_pnominal ,
                                     project_id = 'ew-tesis',
                                     credentials = bq_cred,
@@ -79,3 +79,45 @@ def bq_historico_carga_vd():
                                     dialect = 'standard')
 
     return cvd_historico
+
+
+
+### FILTROS
+
+#PADRON
+def bq_fcarga_pnominal_df():
+    #query_data_pnominal = "SELECT * FROM `ew-tesis.dataset_tesis.pnominal`"
+    query_data_pnominal = "SELECT DISTINCT Fecha_Carga FROM `ew-tesis.dataset_tesis.pnominal`"
+    #SELECT DISTINCT Nombre FROM empleados;
+    pnominal_bq_df = pd.read_gbq(   query = query_data_pnominal ,
+                                    project_id = 'ew-tesis',
+                                    credentials = bq_cred,
+                                    dialect = 'standard')
+    pnominal_bq_df['Fecha_Carga']=pnominal_bq_df['Fecha_Carga'].astype('string')
+    pnominal_bq_df['Fecha_Carga'] = pnominal_bq_df['Fecha_Carga'].str[:19]
+    #pnominal_bq_df['Fecha_creacion_registro'] = pd.to_datetime(pnominal_bq_df['Fecha_creacion_registro'], format="%d/%m/%Y")
+    return pnominal_bq_df
+
+#cvd
+
+def bq_fcarga_cvd_df():
+    #query_data_cvd = "SELECT * FROM `ew-tesis.dataset_tesis.cvd` WHERE Rango_de_Edad ='3 - 5 meses'"
+    query_data_cvd ="SELECT DISTINCT Fecha_Carga FROM `ew-tesis.dataset_tesis.cvd` WHERE Rango_de_Edad ='3 - 5 meses'"
+    cvd_bq_df = pd.read_gbq(   query = query_data_cvd ,
+                                    project_id = 'ew-tesis',
+                                    credentials = bq_cred,
+                                    dialect = 'standard')
+    cvd_bq_df['Fecha_Carga']=cvd_bq_df['Fecha_Carga'].astype('string')
+    cvd_bq_df['Fecha_Carga'] = cvd_bq_df['Fecha_Carga'].str[:19]
+    return cvd_bq_df
+
+#historico vd 
+
+def bq_f_carga_cvd_detalle_df():
+    query_data_cvd_detalle = "SELECT DISTINCT Periodo_VD FROM `ew-tesis.dataset_tesis.cvd_detalle` WHERE Rango_de_Edad ='3 - 5 meses'"
+    cvd_detalle_bq_df = pd.read_gbq(   query = query_data_cvd_detalle ,
+                                    project_id = 'ew-tesis',
+                                    credentials = bq_cred,
+                                    dialect = 'standard')
+   
+    return cvd_detalle_bq_df
