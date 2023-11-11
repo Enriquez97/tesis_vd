@@ -4,7 +4,12 @@ import os
 
 from apps.vd.utils.functions import *
 from apps.vd.constans import DROP_COLUMNAS_PADRON, DROP_COLUMNAS_C1,DROP_VD_DETALLADO
-
+def change_rango_edad(x):
+        if x == 1:
+            return '3 - 5 meses'
+        elif x == 2:
+            return '6 - 12 meses'
+        
 def clean_columns_padron(dataframe = pd.DataFrame()):
     dff = dataframe.drop(DROP_COLUMNAS_PADRON, axis=1)
     dff = dff.rename(columns = {'CÓDIGO DEL PADRON NOMINAL(COD. PAD)': 'COD_PADRON',
@@ -57,10 +62,6 @@ def clean_columns_padron(dataframe = pd.DataFrame()):
        'PROGRAMAS SOCIALES DEL NIÑO(A)\n0=NINGUNO\n1=PIN\n2=PVL\n4=JUNTOS\n5=QALIWARMA \n7=CUNA+ SCD\n8=CUNA+ SAF': 'Programas_Sociales',
     })
     dff['Doc_num_jefefamilia_padron']=dff['Doc_num_jefefamilia_padron'].astype('string')
-    #dff[['CNV', 'CUI', 'DNI']] = dff[['CNV', 'CUI', 'DNI']].astype(float)
-    #dff[['COD']] = dff[['COD']].astype(float)
-    #dff['Tipo de documento Jefe de Familia']=dff['Tipo de documento Jefe de Familia'].astype('string')
-    #dff=dff.fillna('')
     return dff
 
 def clean_columns_c1(dataframe = pd.DataFrame()):
@@ -84,7 +85,8 @@ def clean_columns_c1(dataframe = pd.DataFrame()):
         'Número de Visitas completas': 'Numero_de_Visitas_Completas',
         'Mes': 'Mes_Periodo', 
         'Año': 'Anio_Periodo',
-        'Dni de la madre': 'Dni_de_la_Madre_C',
+        'Número de documento': 'Dni_de_la_Madre_C',
+        'Dni de la madre':'Dni_de_la_Madre_C',
         'Manzana/Zona/Zona': 'Zona',
         'Manzana/Manzana':'Manzana',
         'Manzana/Sector':'Sector',
@@ -107,7 +109,9 @@ def clean_columns_c1(dataframe = pd.DataFrame()):
     )
     dff[['Establecimito_Salud_Meta','Actor_Social','Zona','Manzana','Sector']]=dff[['Establecimito_Salud_Meta','Actor_Social','Zona','Manzana','Sector']].replace(False,'No Especificado')
     dff['Resultado_Muestra'] = dff['Resultado_Muestra'].replace(False,'')
-    #dff=dff.fillna('vacio')
+    dff['Celular_madre_C'] = dff['Celular_madre_C'].replace('.',0)
+    dff['Celular_madre_C'] = dff['Celular_madre_C'].astype(float)
+   
     return dff
 
 
@@ -115,20 +119,15 @@ def clean_padron(dff = pd.DataFrame()):
     
     dff[['CNV', 'CUI', 'DNI']]=dff[['CNV', 'CUI', 'DNI']].fillna(0)#.astype('int')
     dff[['CNV', 'CUI', 'DNI']]=dff[['CNV', 'CUI', 'DNI']].astype('int')
-    # dataframe['Semana'] = dataframe.apply(lambda x: semana_text(x['Año'], x['Semana_']),axis=1)
     dff['Documento_Padron']= dff.apply(lambda x: documento_unique(x['CNV'], x['CUI'],x['DNI'],x['COD_PADRON'],'DOC'),axis=1)
     dff['Tipo_Documento_Padron'] = dff.apply(lambda x: documento_unique(x['CNV'], x['CUI'],x['DNI'],x['COD_PADRON'],'TIPO'),axis=1)
-    
     dff[['AP_MENOR', 'AM_MENOR', 'NOMBRES_MENOR']]=dff[['AP_MENOR', 'AM_MENOR', 'NOMBRES_MENOR']].fillna('')
     dff['Nombres_del_Nino_Padron'] = dff.apply(lambda x: concatenar_datos(x['AP_MENOR'], x['AM_MENOR'],x['NOMBRES_MENOR']),axis=1)
     dff[['AP_MADRE_MENOR', 'AM_MADRE_MENOR', 'NOMBRES_MADRE_MENOR']]=dff[['AP_MADRE_MENOR', 'AM_MADRE_MENOR', 'NOMBRES_MADRE_MENOR']].fillna('')
     dff['Nombres_Madre_del_Nino_Padron'] = dff.apply(lambda x: concatenar_datos(x['AP_MADRE_MENOR'], x['AM_MADRE_MENOR'],x['NOMBRES_MADRE_MENOR']),axis=1)
-    
     dff[['AP_JEFEFAMILIA_MENOR','AM_JEFEFAMILIA_MENOR', 'NOMBES_JEFEFAMILIA_MENOR']]=dff[['AP_JEFEFAMILIA_MENOR','AM_JEFEFAMILIA_MENOR', 'NOMBES_JEFEFAMILIA_MENOR']].fillna('')
     dff['Nombres_JefeFamilia_del_Nino_Padron'] = dff.apply(lambda x: concatenar_datos(x['AP_JEFEFAMILIA_MENOR'], x['AM_JEFEFAMILIA_MENOR'],x['NOMBES_JEFEFAMILIA_MENOR']),axis=1)
-    
     dff['Doc_num_jefefamilia_padron']=dff['Doc_num_jefefamilia_padron'].astype('string')
-    
     dff['Doc_num_madre_padron'] = dff['Doc_num_madre_padron'].astype('string')
     dff['Doc_num_madre_padron'] = dff['Doc_num_madre_padron'].fillna('')
     dff['Doc_num_madre_padron'] = dff['Doc_num_madre_padron'].replace([np.nan],[''])
@@ -207,12 +206,7 @@ def clean_data_report(df):
 
 
 def clean_VD_detalle(dataframe = pd.DataFrame()):
-    def change_rango_edad(x):
-        if x == 1:
-            return '3 - 5 meses'
-        elif x == 2:
-            return '6 - 12 meses'
-        
+    
     dff = dataframe.drop(DROP_VD_DETALLADO, axis=1)
     dff = dff.rename(columns = {
         'Establecimiento Salud':'Establecimito_Salud_Meta', 
@@ -236,8 +230,8 @@ def clean_VD_detalle(dataframe = pd.DataFrame()):
         'Total de visitas realizadas válidas' :'VD_Valida'
     })
     dff[['Numero_VD','VD_Valida']] = dff[['Numero_VD','VD_Valida']].astype(int)
-    #.apply(lambda x: documento_unique(x['CNV'], x['CUI'],x['DNI'],'DOC'),axis=1)
     dff['Rango_de_Edad'] = dff.apply(lambda x: change_rango_edad(x['Rango_de_Edad']),axis=1)
+    
     return dff
 
 

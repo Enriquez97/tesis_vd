@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import datetime
+from apps.vd.constans import COLUMNAS_COMPROMISO_1,EESS_TRUJILLO
 
 def nueva_col_dni(dni_meta, dni_padron):
     if len(dni_meta)!= 0:
@@ -175,3 +176,114 @@ def data_vd(dataframe = None, dataframe_carga = None):
     dfff['Estado_Visita'] = dfff.apply(lambda x: estado_visita(x['Numero_visitas'], x['Numero_visitas_validas'],x['Numero_de_Visitas_Completas']),axis=1)
     #.apply(lambda x: semana_text(x['Año'], x['Semana_']),axis=1)
     return dfff
+
+def table_periodos(dataframe_all_data = None, dataframe_detalle_vd = None):
+        periodo_list = dataframe_detalle_vd['Periodo_VD'].unique()
+        periodos = []
+        total_niños_cargados = []
+        total_niños_asignados = []
+        total_vd_completas = []
+        total_vd_presencial = []
+        total_vd_presencial_validas = []
+        total_vd_presencial_novalidas = []
+        total_vd_presencial_validas_web = []
+        total_vd_presencial_validas_movil = []
+        total_no_encontrados = []
+        total_rechazados = []
+        porcentaje_vd_efectivas = []
+        porcentaje_vd_movil = []
+        for periodo in periodo_list:
+            
+            
+            all_vd_df = dataframe_all_data[dataframe_all_data['Periodo_VD'] == periodo]
+            detalle_vd_df = dataframe_detalle_vd[dataframe_detalle_vd['Periodo_VD'] == periodo]
+            
+            niños_cargados_total = all_vd_df['Numero_Doc_Nino'].count()
+            niños_asignados_total = all_vd_df[all_vd_df['Establecimito_Salud_Meta'].isin(EESS_TRUJILLO)]['Establecimito_Salud_Meta'].count()
+            vd_completa_total = all_vd_df['Numero_de_Visitas_Completas'].sum()
+            
+            periodos.append(periodo)
+            total_niños_cargados.append(niños_cargados_total)
+            total_niños_asignados.append(niños_asignados_total)
+            total_vd_completas.append(vd_completa_total)
+            
+            detalle_vd_df= detalle_vd_df[detalle_vd_df['Tipo_VD']=='Visita presencial']
+            vd_presencial_total = detalle_vd_df['Numero_Doc_Nino'].count()
+            vd_presencial_valida_total = detalle_vd_df['VD_Valida'].sum()
+            vd_presencial_novalida_total = vd_presencial_total-vd_presencial_valida_total
+            vd_presencial_valida_web = detalle_vd_df[(detalle_vd_df['Dispositivo_Intervencion']=='WEB')&(detalle_vd_df['Estado_Intervencion_VD']=='Registrado')]['Dispositivo_Intervencion'].count()
+            vd_presencial_valida_movil = detalle_vd_df[(detalle_vd_df['Dispositivo_Intervencion']=='MOVIL')&(detalle_vd_df['Estado_Intervencion_VD']=='Registrado')]['Dispositivo_Intervencion'].count()
+            no_encontrados_total = detalle_vd_df[(detalle_vd_df['Etapa_VD']=='No Encontrado')]['Etapa_VD'].count()
+            rechazados_total = detalle_vd_df[(detalle_vd_df['Etapa_VD']=='Rechazado')]['Etapa_VD'].count()
+            vd_efectivas_porcentaje = round(((niños_cargados_total-vd_presencial_novalida_total-no_encontrados_total-rechazados_total)/niños_cargados_total)*100,1)
+            vd_movil_porcentaje = round((vd_presencial_valida_movil/vd_presencial_valida_total)*100,1)
+            
+            total_vd_presencial.append(vd_presencial_total)
+            total_vd_presencial_validas.append(vd_presencial_valida_total)
+            total_vd_presencial_novalidas.append(vd_presencial_novalida_total)
+            total_vd_presencial_validas_web.append(vd_presencial_valida_web)
+            total_vd_presencial_validas_movil.append(vd_presencial_valida_movil)
+            total_no_encontrados.append(no_encontrados_total)
+            total_rechazados.append(rechazados_total)
+
+            porcentaje_vd_efectivas.append(vd_efectivas_porcentaje)
+            porcentaje_vd_movil.append(vd_movil_porcentaje)
+            dict_table = {
+                'Periodo' : periodos,
+                '3-5 Meses' :total_niños_cargados,
+                'Total de Niños Asignados' : total_niños_asignados,
+                'Total de VD Completas' : total_vd_completas,
+                'Total VD Presencial' : total_vd_presencial,
+                'Total VD Presencial Válidas' : total_vd_presencial_validas,
+                'Total VD Presencial No Válidas' : total_vd_presencial_novalidas,
+                'Total VD Presencial por WEB' : total_vd_presencial_validas_web,
+                'Total VD Presencial por MOVIL' : total_vd_presencial_validas_movil,
+                'No Encontrados' : total_no_encontrados,
+                'Rechazados' : total_rechazados,
+                '% VD Efectivas':porcentaje_vd_efectivas,
+                '% VD Georreferencia':porcentaje_vd_movil
+            }
+            dff = pd.DataFrame(dict_table)
+        value_total_efectivas_vd = dff['% VD Efectivas'].sum()
+        value_promedio_efectivas_vd = round(dff['% VD Efectivas'].mean(),1)
+            
+        value_total_geo_vd = dff['% VD Georreferencia'].sum()
+            
+        
+        dff.loc['TOTAL',:]= dff.sum(numeric_only=True, axis=0)  
+        dff=dff.fillna('TOTAL')
+        dff['% VD Efectivas']=dff['% VD Efectivas'].replace({value_total_efectivas_vd: value_promedio_efectivas_vd})
+            
+        #
+        
+        
+        
+        value_geo_vd = round((dff['Total VD Presencial por MOVIL'].unique()[-1]/dff['Total VD Presencial'].unique()[-1])*100,1)    
+        dff['% VD Georreferencia']=dff['% VD Georreferencia'].replace({value_total_geo_vd: value_geo_vd})
+        return dff
+
+def mes_num(x):
+    if x == 'Ene':
+        return 1
+    elif x == 'Feb':
+        return 2
+    elif x == 'Mar':
+        return 3
+    elif x == 'Abr':
+        return 4
+    elif x == 'May':
+        return 5
+    elif x == 'Jun':
+        return 6
+    elif x == 'Jul':
+        return 7
+    elif x == 'Ago':
+        return 8
+    elif x == 'Set':
+        return 9
+    elif x == 'Oct':
+        return 10
+    elif x == 'Nov':
+        return 11
+    elif x == 'Dic':
+        return 12

@@ -13,6 +13,8 @@ from apps.vd.data.ingesta import cargarDataVdReporte
 from apps.vd.utils.table import table_dag
 from apps.vd.utils.figures import bar_go_figure,pie_figure
 import datetime
+import re
+
 def modal_child(estado = 'positivo'):
         if estado == 'positivo':
             out =[
@@ -65,7 +67,7 @@ def dash_concatenar_data():
     
     
     
-    app.layout = Content([
+    app.layout = dmc.Container([
         Row([Column([title(content='Generar Lista para las Visitas Domiciliarias',order=1)],size=12)]),
         Row([
             Column([
@@ -85,7 +87,7 @@ def dash_concatenar_data():
         ]),
         Row([
             Column([
-                select(id='select-historial-vd', data=periodo_cvd_detalle, texto='Historial de VD',value = periodo_cvd_detalle[-1],clearable=False)
+                select(id='select-historial-vd', data=periodo_cvd_detalle, texto='Historial de VD',value = periodo_cvd_detalle[0],clearable=False)
             ],size=6),
             Column([
                 dmc.TextInput(id='text-vd-detalle',label="Número de VD Realizadas",disabled=True,size='md')
@@ -115,8 +117,9 @@ def dash_concatenar_data():
         ]),
         
         Store(id='data-values'),
-        Download(),
-    ])
+        #Download(),
+        dcc.Download(id="descargar")
+    ],fluid=False)
     
     @app.callback(
                 
@@ -132,25 +135,24 @@ def dash_concatenar_data():
                 #Input('btn-concatenar','n_clicks'),    
     )
     def update_text_input(filter_pnominal, filter_cvd,filter_vd_detalle):#,btn_concatenar
-        #if filter_pnominal != None:
-        pnominal_bq_df= bq_pnominal_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.pnominal`")
+        #carga padron nominal
+        pnominal_bq_df= bq_pnominal_df(query = f"SELECT * FROM `ew-tesis.dataset_tesis.pnominal` WHERE Fecha_Carga ='{filter_pnominal}'")
+        #carga de niños cargados en el aplicativo de VD
         cvd_bq_df = bq_cvd_df()
+        # carga visitas domiciliarias realizadas
         cvd_detalle_bq_df = bq_cvd_detalle_df()
+        
         pnominal_df = pnominal_bq_df[pnominal_bq_df['Fecha_Carga']==filter_pnominal]
         fecha_last_pnominal = str(max(pnominal_df['Fecha_creacion_registro'].unique()))[:10]
         cvd_df = cvd_bq_df[cvd_bq_df['Fecha_Carga']==filter_cvd]
         periodo = str(cvd_df['Periodo_VD'].unique()[0])
-
         cvd_detalle_df =cvd_detalle_bq_df[cvd_detalle_bq_df['Periodo_VD']==filter_vd_detalle]
         num_vd = cvd_detalle_df['Periodo_VD'].count()
-
         pnominal_dff = clean_padron(dff = pnominal_df)   
         pnominal_dfff = columns_merge_pnominal(pnominal_dff) 
         cvd_dff = clean_compromiso1_data(cvd_df)
-        
         merge_df = cvd_dff.merge(pnominal_dfff,how = 'left',left_on=["Numero_Doc_Nino"], right_on=["Documento_Padron"])
         merge_dff = clean_data_concat(merge_df)
-        print(merge_dff['Documento_Padron'].unique())
         estado_vd_anterior_df = etapa_VD_detalle(dataframe = cvd_detalle_df)
         report_dff = merge_dff.merge(estado_vd_anterior_df,how = 'left',left_on=["Numero_Doc_Nino"], right_on=["Numero_Doc_Nino"])
         report_dff['Etapa_VD'] = report_dff['Etapa_VD'].fillna('Niño Nuevo')
@@ -161,7 +163,7 @@ def dash_concatenar_data():
         return fecha_last_pnominal, periodo, num_vd,report_final.to_dict('series'),table_dag(df =report_final )
     
     @app.callback(               
-                Output('download','data'),
+                Output('descargar','data'),
                 Input('btn-download','n_clicks'),
                 State('data-values','data'),
                 State('select-fecha-carga-c1',"value"), 
@@ -172,6 +174,9 @@ def dash_concatenar_data():
         if n_clicks_download:
             name_file = f"report_vd_{periodo}.xlsx"
             df = pd.DataFrame(data)
+            df['Direccion_Nino_C'] = df.apply(lambda x:re.sub(r"[^a-zA-Z0-9]", " ", x['Direccion_Nino_C']),axis=1)
+            print(df)
+            #ddf = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 1, 5, 6], "c": ["x", "x", "y", "y"]})
             return dcc.send_data_frame(df.to_excel, name_file, sheet_name="Sheet_name_1",index =False)
 
     

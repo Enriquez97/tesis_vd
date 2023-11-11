@@ -48,3 +48,27 @@ def cargarDataVDetalle(df = pd.DataFrame(),schema ={}):
                       credentials = bq_cred,
                       table_schema =  schema             
     )
+##HISTORICOS INGESTA
+
+
+def cargarHistoricoCarga(df = pd.DataFrame(),schema ={}):
+    
+    
+    return pandas_gbq.to_gbq(dataframe = df,
+                      destination_table = 'dataset_tesis.historial_vd_cargados',
+                      project_id='ew-tesis',
+                      if_exists = 'append',#append
+                      credentials = bq_cred,
+                      table_schema =  schema             
+    )
+
+def cargarHistoricoVD(df = pd.DataFrame(),schema ={}):
+    
+    
+    return pandas_gbq.to_gbq(dataframe = df,
+                      destination_table = 'dataset_tesis.cvd_detalle',
+                      project_id='ew-tesis',
+                      if_exists = 'append',#append
+                      credentials = bq_cred,
+                      table_schema =  schema             
+    )

@@ -172,8 +172,8 @@ def bar_go_figure(df = pd.DataFrame(), x = '', y = '', text = '', orientation = 
 
         return figure
 
-def figure_bar_px(titulo = '',x_titulo = '',y_titulo = '',l_titulo = '', df = None , x = '', y = '', color = '', barmode = 'stack' , template = 'none', height = 400, showticklabels_x = True,showticklabels_y = True,bottom=100,top=60):
-  fig = px.bar(df, x = x, y = y,color = color, barmode = barmode, template = template,height = height,text_auto=True, color_discrete_sequence=px.colors.qualitative.Safe)
+def figure_bar_px(titulo = '',x_titulo = '',y_titulo = '',l_titulo = '', df = None , x = '', y = '', color = '', barmode = 'stack' , template = 'none', height = 400, showticklabels_x = True,showticklabels_y = True,bottom=100,top=60, color_list = px.colors.qualitative.Safe):
+  fig = px.bar(df, x = x, y = y,color = color, barmode = barmode, template = template,height = height,text_auto=True, color_discrete_sequence= color_list)
   fig.update_traces(textfont_size=16,textfont_family = "sans-serif",textfont_color ='black', textangle=0, textposition="outside", cliponaxis=False)
   fig.update_layout(legend=dict(
     orientation="h",

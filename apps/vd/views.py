@@ -4,7 +4,7 @@ from apps.vd.layouts.dash_padron import dash_carga_padron,dash_padron_nominal
 from apps.vd.layouts.dash_compromiso import dash_carga_compromiso,dash_compromiso,dash_descarga_data_compromiso,dashboard_indicadores_vd
 from apps.vd.layouts.dash_general import dash_concatenar_data,dashboard_reporteVD_
 from apps.vd.layouts.dash_extraccion_data import dash_extraer_padron
-from ..vd.layouts.layouts_ingesta import dash_ingestas
+from ..vd.layouts.layouts_ingesta import dash_ingestas,dash_ingesta_periodo
 from ..vd.layouts.layouts_indicadores import *
 from ..vd.layouts.inicio import dash_home
 @login_required
@@ -51,8 +51,12 @@ def extraer_data_padron(request):
 @login_required
 def ingesta_any(request):
     context = {'dashboad':dash_ingestas()}
-    return render(request, 'ingesta_any.html',context)
-#
+    return render(request, 'Ingestas/ingesta_any.html',context)
+
+@login_required
+def ingesta_periodo(request):
+    context = {'dashboad':dash_ingesta_periodo()}
+    return render(request, 'Ingestas/ingesta_fin_periodo.html',context)
 
 
 ########DASHBOARDS

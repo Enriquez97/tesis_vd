@@ -8,9 +8,6 @@ def update_profile(request):
      return render(request,'users/update_profile.html')
 
 def login_view(request):
-    #empresas=list(Municipalidad.objects.all())
-    #print(empresas)
-    #context={'empresas':empresas}
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -20,8 +17,7 @@ def login_view(request):
                 login(request, user)
                 return redirect('home')#('/cuentas_por_pagar/')
         else:
-                return render(request,'users/login.html',{'error':'Invalid username and password'})
-        
+                return render(request,'users/login.html',{'error':'Acceso Denegado'})
     return render (request,'users/login.html')
 
 @login_required

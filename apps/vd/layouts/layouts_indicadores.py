@@ -153,9 +153,11 @@ def dash_indicador_vd_oportunas():
     app.layout = Container([
         Row([
             Column([
-                title(content = 'Seguimiento de Visitas Domiciliarias Oportunas',id = 'ti',order=1) 
-            ],size=12),
-            
+                title(content = 'Seguimiento de Visitas Domiciliarias Oportunas (3 a 5 meses)',id = 'ti',order=1) 
+            ],size=11),
+            Column([
+               btnDownload()
+            ],size=1),
         ]),
         Row([
             
@@ -166,7 +168,7 @@ def dash_indicador_vd_oportunas():
                 select(id='select-as',texto='Actor Social')
             ],size=4),
             Column([
-                select(id='select-periodo',texto='Periodo',data=periodos,value = periodos[-1],clearable=False )
+                select(id='select-periodo',texto='Periodo',data=periodos,value = periodos[-2],clearable=False )
             ],size=2)
             
         ]),
@@ -206,6 +208,8 @@ def dash_indicador_vd_oportunas():
         Div(id='notifications-update-data'),
         Store(id='data-vd-completas'),
         Store(id='data-values'),
+        Store(id='data-table'),
+        dcc.Download(id="descargar")
     ])
     @app.callback(               
                 #Output('select-eess','data'),
@@ -213,6 +217,8 @@ def dash_indicador_vd_oportunas():
                 Output('select-as','data'),
                 Output('data-vd-completas','data'),
                 Output('data-values','data'),
+                #data-table'
+                
                 Output("notifications-update-data","children"),
                 Input('select-periodo','value'),
                 Input('select-eess','value'), 
@@ -221,9 +227,12 @@ def dash_indicador_vd_oportunas():
     def update_filters(periodo,eess,actor_social):#
         historico_carga_dff = completar_segun_periodo(dataframe = vd_carga_dff, dataframe_historico = historico_vd_df)
         historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = cvd_detalle_df, tipo = 'vd')
+        print("here")
+        print(historico_vd_dff)
         historicof_carga_dff = historico_carga_dff[historico_carga_dff['Mes_Periodo']==periodo]
+        historicof_carga_dff= historicof_carga_dff[historicof_carga_dff['Rango_de_Edad']=='3 - 5 meses']
         historicof_vd_dff = historico_vd_dff[historico_vd_dff['Mes_VD']==periodo]
-        
+        historicof_vd_dff = historicof_vd_dff[historicof_vd_dff['Rango_de_Edad']=='3 - 5 meses']
         
         vd_det_as_df=historicof_vd_dff.groupby(['Numero_Doc_Nino','Actor_Social'])[['Rango_de_Edad']].count().reset_index()
         table_num_vd_completas = historicof_carga_dff.groupby(['Numero_Doc_Nino','Establecimito_Salud_Meta'])[['Numero_de_Visitas_Completas']].sum().reset_index()
@@ -263,6 +272,7 @@ def dash_indicador_vd_oportunas():
                 Output('pie-eess-vd','figure'),
                 Output('pie-etapa-vd','figure'),
                 Output('line-vd-st','figure'),
+                Output('data-table','data'),
                
                 Input('data-vd-completas','data'),
                 Input('data-values','data'),       
@@ -314,13 +324,30 @@ def dash_indicador_vd_oportunas():
                                 list_or_color=px.colors.qualitative.T10,
                                 
                                 ),
-            figure_line_px(df = st_fecha_inter_df ,x='Fecha_Intervencion', y = 'Número de Visitas Realizadas', color = 'Estado_VD',text='Número de Visitas Realizadas', titulo = 'Serie de Tiempo de las Visitas Domiciliarias Realizadas',height=350,top=85)
+            figure_line_px(df = st_fecha_inter_df ,x='Fecha_Intervencion', y = 'Número de Visitas Realizadas', color = 'Estado_VD',text='Número de Visitas Realizadas', titulo = 'Serie de Tiempo de las Visitas Domiciliarias Realizadas',height=350,top=85),
+            dff_Data_.to_dict('series')
         ]
+    @app.callback(
+            
+            Output("descargar", "data"),
+            Input("data-table","data"),
+            Input("btn-download", "n_clicks"),
+            prevent_initial_call=True,
+            
+            )
+    def update_download(data,n_clicks_download):
+        options=pd.DataFrame(data)
+        #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
+        if n_clicks_download:
+            return dcc.send_data_frame( options.to_excel, "vd_oportunos.xlsx", sheet_name="Sheet_name_1",index =False)
+        
 
 def dash_indicador_vd_consecutivas():
     #historico
     historico_vd_df=bq_historico_carga_vd()
+    print(historico_vd_df)
     vd_carga_dff = bq_cvd_df()
+    print(vd_carga_dff)
     #
     cvd_detalle_df = bq_cvd_detalle_df()
     cvd_reporte_df = bq_cvd_reporte_df() 
@@ -331,9 +358,11 @@ def dash_indicador_vd_consecutivas():
     app.layout = Container([
         Row([
             Column([
-                title(content = 'Seguimiento de Visitas Domiciliarias Consecutivas',id = 'ti',order=1) 
-            ],size=12),
-            
+                title(content = 'Seguimiento de Visitas Domiciliarias Consecutivas (3 a 5 meses)',id = 'ti',order=1) 
+            ],size=11),
+            Column([
+               btnDownload()
+            ],size=1),
         ]),
         Row([
             
@@ -350,7 +379,7 @@ def dash_indicador_vd_consecutivas():
         ]),
         Row([
             Column([cardSection(text='Total de Niños Evaluados',radius='xs',id_value='card-total-evaluados')],size=2),
-            Column([cardSection(text='Total Niños Cargados',radius='xs',id_value='card-total-menores')],size=2),
+            Column([cardSection(text='Total Niños Cargados y Visitados',radius='xs',id_value='card-total-menores')],size=2),
             Column([cardSection(text='Total Visitas Completas',radius='xs',id_value='card-total-vdc')],size=2),
             Column([cardSection(text='Total Visitas Realizadas Válidas',radius='xs',id_value='card-total-vdrv')],size=2),
             Column([cardSection(text='Porcentaje de Visitas Realizadas',radius='xs',id_value='card-porcentaje-vd')],size=2),
@@ -368,7 +397,7 @@ def dash_indicador_vd_consecutivas():
                  loadingOverlay(cardGraph(id_graph = 'pie-eess_vd', id_maximize = 'maximize-pie-eess_vd',height=350))
             ],size=3),
             Column([
-                Div(id='table-vd')
+                loadingOverlay(cardGraph(id_graph = 'bar-total-vd', id_maximize = 'maximize-bar-total-vd',height=350))
                 
             ],size=6),
             
@@ -376,15 +405,9 @@ def dash_indicador_vd_consecutivas():
         ]),
         Row([
             Column([
-                loadingOverlay(cardGraph(id_graph = 'bar-total-vd', id_maximize = 'maximize-bar-total-vd',height=350))
-            ],size=6),
-            Column([
-                #loadingOverlay(cardGraph(id_graph = 'pie-consecutivo', id_maximize = 'maximize-pie-consecutivo',height=350))
-            ],size=3),
-            Column([
-                 
-                 #loadingOverlay(cardGraph(id_graph = 'pie-etapa-vd', id_maximize = 'maximize-pie-etapa-vd',height=350))
-            ],size=3),
+                Div(id='table-vd')
+            ],size=12),
+            
             
             
             
@@ -392,6 +415,8 @@ def dash_indicador_vd_consecutivas():
         Div(id='notifications-update-data'),
         Store(id='data-vd-completas'),
         Store(id='data-values'),
+        Store(id='data-table'),
+        dcc.Download(id="descargar")
     ])
     @app.callback(               
                 #Output('select-eess','data'),
@@ -405,8 +430,11 @@ def dash_indicador_vd_consecutivas():
                 Input('select-as','value'),         
     )
     def update_filters(periodo,eess,actor_social):#
-        historico_carga_dff = completar_segun_periodo(dataframe = vd_carga_dff, dataframe_historico = historico_vd_df)
-        historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = cvd_detalle_df, tipo = 'vd')
+        #historico_carga_dff = completar_segun_periodo(dataframe = vd_carga_dff, dataframe_historico = historico_vd_df)
+        historico_carga_dff = historico_vd_df[historico_vd_df['Rango_de_Edad']=='3 - 5 meses']
+        print(historico_carga_dff)
+        #historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = cvd_detalle_df, tipo = 'vd')
+        historico_vd_dff=cvd_detalle_df[cvd_detalle_df['Rango_de_Edad']=='3 - 5 meses']
         if periodo == None:
             historicof_carga_dff = historico_carga_dff.copy()
             historicof_vd_dff = historico_vd_dff.copy()
@@ -453,6 +481,7 @@ def dash_indicador_vd_consecutivas():
                 Output('pie-eess_vd','figure'),
                 #pie-eess_vd
                 Output('bar-total-vd','figure'),
+                Output('data-table','data'),
                 #Output('pie-eess-vd','figure'),
                 #Output('pie-etapa-vd','figure'),
                 #Output('line-vd-st','figure'),
@@ -463,12 +492,15 @@ def dash_indicador_vd_consecutivas():
     def update_data(data_table,data):
         table_num_vd_completas = pd.DataFrame(data_table)
         df = pd.DataFrame(data)
+        #table_num_vd_completas[]
         print(table_num_vd_completas)
+        
         total_niños_evaluados = len(table_num_vd_completas['Numero_Doc_Nino'].unique())
-        total_ninos_cargados = table_num_vd_completas['Numero_Doc_Nino'].count()
-        total_ninos_vd = table_num_vd_completas['Numero_de_Visitas_Completas'].sum()
+        total_menores_dff = df.groupby(['Numero_Doc_Nino','Periodo_VD'])[['Estado_Intervencion_VD']].count().reset_index()
+        total_ninos_cargados = total_menores_dff['Numero_Doc_Nino'].count()
+        total_ninos_vd = df['Actor_Social'].count()
         total_vd_realizadas = df['VD_Valida'].sum()
-        porcentaje = f"{round((total_vd_realizadas/total_ninos_vd)*100)}%"#
+        porcentaje = f"{round((total_vd_realizadas/(table_num_vd_completas['Numero_de_Visitas_Completas'].sum()))*100)}%"#
         promedio_eess = round(total_vd_realizadas/len(df['Establecimito_Salud_Meta'].unique()))
         
         numVD_df = table_num_vd_completas.groupby(['Numero_Doc_Nino'])[['Numero_de_Visitas_Completas']].sum().reset_index()
@@ -527,7 +559,21 @@ def dash_indicador_vd_consecutivas():
                                 list_or_color=px.colors.qualitative.T10
                                 ),
             figure_bar_px(df = vd_df_eess_mes ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = 'Mes_VD', titulo = 'Número de Visitas por Periodo',showticklabels_x=True,bottom=20,top=85,height=350),
+            dff_pivot.to_dict('series')
         ]
+    @app.callback(
+            
+            Output("descargar", "data"),
+            Input("data-table","data"),
+            Input("btn-download", "n_clicks"),
+            prevent_initial_call=True,
+            
+            )
+    def update_download(data,n_clicks_download):
+        options=pd.DataFrame(data)
+        #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
+        if n_clicks_download:
+            return dcc.send_data_frame( options.to_excel, "vd_consecutivas.xlsx", sheet_name="Sheet_name_1",index =False)
 
 def dash_indicador_vd_georreferenciadas():
     #historico
@@ -546,8 +592,11 @@ def dash_indicador_vd_georreferenciadas():
         Modal(id="modal-bar-eess-movil", size= "90%"),
         Row([
             Column([
-                title(content = 'Seguimiento de Visitas Domiciliarias Georreferenciadas',id = 'ti',order=1) 
-            ],size=12),
+                title(content = 'Seguimiento de Visitas Domiciliarias Georreferenciadas (3 a 5 meses)',id = 'ti',order=1) 
+            ],size=11),
+            Column([
+               btnDownload()
+            ],size=1),
             
         ]),
         Row([
@@ -585,6 +634,8 @@ def dash_indicador_vd_georreferenciadas():
         Div(id='notifications-update-data'),
         Store(id='data-vd-completas'),
         Store(id='data-values'),
+        Store(id='data-table'),
+        dcc.Download(id="descargar")
     ])
     @app.callback(               
                 #Output('select-eess','data'),
@@ -643,7 +694,7 @@ def dash_indicador_vd_georreferenciadas():
                 Output('map-vd','figure'),
                 Output('pie-dispositivo','figure'),
                 Output('bar-eess-movil','figure'),
-                
+                Output('data-table','data'),
                 
                
                 Input('data-vd-completas','data'),
@@ -695,7 +746,23 @@ def dash_indicador_vd_georreferenciadas():
                                 list_or_color=px.colors.qualitative.T10
                                 ),
              figure_bar_px(df = eess_movil_dff ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = None, titulo = 'Visitas por Dispositivo Movil',showticklabels_x=True,bottom=20,top=60,height=450),
+             geo_df.to_dict('series')
         ]
+    @app.callback(
+            
+            Output("descargar", "data"),
+            Input("data-table","data"),
+            Input("btn-download", "n_clicks"),
+            prevent_initial_call=True,
+            
+            )
+    def update_download(data,n_clicks_download):
+        options=pd.DataFrame(data)
+        #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
+        if n_clicks_download:
+            return dcc.send_data_frame( options.to_excel, "vd_geo.xlsx", sheet_name="Sheet_name_1",index =False)
+        
+
     callback_opened_modal(app, modal_id="modal-map-vd",children_out_id="map-vd", id_button="maximize-map-vd",height_modal = 900)
     callback_opened_modal(app, modal_id="modal-pie-dispositivo",children_out_id="pie-dispositivo", id_button="maximize-pie-dispositivo",height_modal = 900)
     callback_opened_modal(app, modal_id="modal-bar-eess-movil",children_out_id="bar-eess-movil", id_button="maximize-bar-eess-movil",height_modal = 900)
