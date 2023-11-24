@@ -4,6 +4,7 @@ import plotly.graph_objs as go
 from apps.vd.utils.components import actionIcon
 from apps.vd.utils.figures import create_graph_empty
 from dash_iconify import DashIconify
+from ..utils.frames import *
 
 figure_vacia = create_graph_empty()
 
@@ -110,3 +111,41 @@ def cardSection(id_value = '',shadow='xl', radius='md', border =  True, text = '
             radius = radius,
 
         )
+
+def card_index( img = '', title_card = '', description = '', url = ''):
+    
+    return Div([dmc.Card(
+        children=[
+            dmc.CardSection(
+                dmc.Image(src = img,height=300)
+            ),
+            dmc.Group(
+                [
+                    dmc.Text(title_card, weight=500,size="lg"),
+                    dmc.Badge("habilitado", color="green", variant="light"),
+                ],
+                position="apart",
+                mt="md",
+                mb="xs",
+            ),
+            dmc.Text(
+                description ,
+                size="sm",
+                color="dimmed",
+            ),
+        html.A( 
+            dmc.Button(
+                "Ingresar",
+                variant="light",
+                color="blue",
+                fullWidth=True,
+                mt="md",
+                radius="md",
+            ),
+            href=url
+        )
+        ],
+        withBorder=True,
+        shadow="sm",
+        radius="md",
+    )])

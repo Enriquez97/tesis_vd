@@ -315,7 +315,6 @@ def dash_ingestas():
                 
                 )
     def update_pnominal(upload_1, upload_2):
-        #df.to_dict('series'),
         if upload_1 == None and upload_2 == None:
             
             return '', '', None
@@ -356,27 +355,25 @@ def dash_ingestas():
             return f"{df_1.shape[0]}",f"{df_2.shape[0]}",dff.to_dict('series')
     
     @app.callback(
-                Output('modal-alerta-pn', 'opened'),
-                Output('modal-alerta-pn', 'children'),
-                
-                Input('btn-guardar-data-pnominal','n_clicks'),
-                State('data-value','data'),
-                State('modal-alerta-pn', 'opened'),
-                prevent_initial_call=True, 
-                )
+        Output('modal-alerta-pn', 'opened'),
+        Output('modal-alerta-pn', 'children'),
+        Input('btn-guardar-data-pnominal','n_clicks'),
+        State('data-value','data'),
+        State('modal-alerta-pn', 'opened'),
+        prevent_initial_call=True, 
+    )
     def update_save_pn(n_clicks_guardar,data,opened):
                 import datetime
                 df = pd.DataFrame(data)
-                
                 if n_clicks_guardar:
                     
-                        df['Fecha_Carga'] = datetime.datetime.now()
-                        print(df)
-                        try:
-                            cargarDataPadron(df,None)
-                            return True, modal_child()
-                        except:
-                            return True, modal_child(estado='negativo')
+                    df['Fecha_Carga'] = datetime.datetime.now()
+                    
+                    try:
+                        cargarDataPadron(df,None)
+                        return True, modal_child()
+                    except:
+                        return True, modal_child(estado='negativo')
     
     @app.callback(
                 Output('text-data-upload-carga', 'value'),

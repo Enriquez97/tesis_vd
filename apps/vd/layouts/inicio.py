@@ -1,6 +1,7 @@
 from django_plotly_dash import DjangoDash
 from ...vd.constans import EXTERNAL_SCRIPTS, EXTERNAL_STYLESHEETS
 from ..utils.frames import *
+from ..utils.cards import *
 import dash_mantine_components as dmc
 from dash import *
 from PIL import Image
@@ -15,47 +16,7 @@ image_svdc = 'https://img.freepik.com/vector-gratis/ilustracion-concepto-mensaje
 image_svdg = 'https://esarco.es/wp-content/uploads/2020/05/certificado-coordenadas-georreferenciadas.png'
 imagen_rvd = 'https://previews.123rf.com/images/lembergvector/lembergvector2112/lembergvector211200033/178732022-proceso-de-medici%C3%B3n-de-indicadores-clave-de-desempe%C3%B1o-de-la-empresa-resultados-estrat%C3%A9gicos-y.jpg'
 
-def card_index( img = '', title_card = '', description = '', url = ''):
-    
-    return Div([dmc.Card(
-        children=[
-            dmc.CardSection(
-                dmc.Image(
-                    src = img,#Image.open(f"apps/graph/build/containers/assets/{img}"),
-                    height=300,
-                )
-            ),
-            dmc.Group(
-                [
-                    dmc.Text(title_card, weight=500,size="lg"),
-                    dmc.Badge("habilitado", color="green", variant="light"),
-                ],
-                position="apart",
-                mt="md",
-                mb="xs",
-            ),
-            dmc.Text(
-                description ,
-                size="sm",
-                color="dimmed",
-            ),
-        html.A(
-            dmc.Button(
-                "Ingresar",
-                variant="light",
-                color="blue",
-                fullWidth=True,
-                mt="md",
-                radius="md",
-            ),
-            href=url
-        )
-        ],
-        withBorder=True,
-        shadow="sm",
-        radius="md",
-        
-    )])
+
 def dash_home():
     app = DjangoDash('home', external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([

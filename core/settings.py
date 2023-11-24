@@ -195,8 +195,8 @@ PLOTLY_COMPONENTS = [
     'dash_bootstrap_templates',
 ]
 
-LOGIN_URL = '/user/login/'
-LOGIN_REDIRECT_URL='/user/login/'
+LOGIN_URL = '/user/login'
+LOGIN_REDIRECT_URL='/user/login'
 
 
 REST_FRAMEWORK = {

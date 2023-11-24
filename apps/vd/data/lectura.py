@@ -15,8 +15,8 @@ def bq_pnominal_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.pnominal`"):
     return pnominal_bq_df
 
 # DATA UNICA DEL ULTIMO MES DE CARGA VD
-def bq_cvd_df():
-    query_data_cvd = "SELECT * FROM `ew-tesis.dataset_tesis.cvd` WHERE Rango_de_Edad !='Otros menores a 12 meses'"#
+def bq_cvd_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd` WHERE Rango_de_Edad !='Otros menores a 12 meses'"):
+    query_data_cvd = query#
     cvd_bq_df = pd.read_gbq(   query = query_data_cvd ,
                                     project_id = 'ew-tesis',
                                     credentials = bq_cred,
@@ -28,8 +28,8 @@ def bq_cvd_df():
     return cvd_bq_df
 
 #historico de visitas domiciarias completadas durante el mes
-def bq_cvd_detalle_df():
-    query_data_cvd_detalle = "SELECT * FROM `ew-tesis.dataset_tesis.cvd_detalle` WHERE Rango_de_Edad !='Otros menores a 12 meses'"
+def bq_cvd_detalle_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd_detalle` WHERE Rango_de_Edad !='Otros menores a 12 meses'"):
+    query_data_cvd_detalle = query
     cvd_detalle_bq_df = pd.read_gbq(   query = query_data_cvd_detalle ,
                                     project_id = 'ew-tesis',
                                     credentials = bq_cred,
@@ -127,3 +127,13 @@ def bq_periodos_historico_vd(query = "SELECT DISTINCT Mes_VD FROM `ew-tesis.data
                                     dialect = 'standard')
 
     return cvd_historico
+
+
+def bq_call_select(column = '', table = '' ):
+    #query = "SELECT * FROM `ew-tesis.dataset_tesis.historial_vd_cargados` WHERE Rango_de_Edad ='3 - 5 meses'"
+    df = pd.read_gbq(   query = f"SELECT DISTINCT {column} FROM `ew-tesis.dataset_tesis.{table}`" ,
+                                    project_id = 'ew-tesis',
+                                    credentials = bq_cred,
+                                    dialect = 'standard')
+
+    return df
