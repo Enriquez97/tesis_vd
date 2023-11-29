@@ -206,6 +206,8 @@ from ..data.lectura import bq_pnominal_df
 #padron_df = transform_padron(dff = padron_df)
 #print(padron_df.columns)
 
+
+
 def dash_padron_nominal():
     select_carga = bq_fcarga_pnominal_df()
     select_ = select_carga['Fecha_Carga'].unique()
@@ -310,14 +312,7 @@ def dash_padron_nominal():
     def update_filtro_data(*args):
         
         pnominal_df = bq_pnominal_df(query = f"SELECT * FROM `ew-tesis.dataset_tesis.pnominal`WHERE Fecha_Carga = '{args[0]}'")
-        print('here')
         df = transform_padron(dff=pnominal_df)
-        print(df)
-        #datepicker_inicio = datetime.strptime(args[1], "%d/%m/%Y").date()
-        #print(datepicker_inicio)
-        #datepicker_fin = datetime.strptime(args[2], "%d/%m/%Y").date()
-        #print(datepicker_fin)
-        
         dff = df[(df['Fecha de Nacimiento']>=args[1])&(df['Fecha de Nacimiento']<=args[2])]
         if validar_all_none(variables = (args[3:])) == True:
             dfff=dff.copy()
@@ -340,12 +335,10 @@ def dash_padron_nominal():
     )
     def update_graph_linea(data,segmented):
        df = pd.DataFrame(data) 
-       print(df)
        if segmented == 'Mes':
             st_df=df.groupby([segmented,'Mes Num'])[['Tipo de Documento']].count().sort_values('Mes Num').reset_index()
        else:
             st_df=df.groupby([segmented])[['Tipo de Documento']].count().reset_index()
-       print(st_df)
        return line_figure(df = st_df, 
                           x = [segmented], 
                           y = 'Tipo de Documento',
@@ -449,7 +442,6 @@ def dash_padron_nominal():
             )
     def update_download(data,n_clicks_download):
         options=pd.DataFrame(data)
-        #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
         if n_clicks_download:
             return dcc.send_data_frame( options.to_excel, "padron.xlsx", sheet_name="Sheet_name_1",index =False)
         

@@ -24,7 +24,17 @@ def carga_padron(request):
     context = {'dashboad':dash_carga_padron()}
     return render(request, 'carga_padron.html',context)
 
+import time
 #dash_padron_nominal
+def mide_tiempo(funcion):
+    def funcion_medida(*args, **kwargs):
+        inicio = time.time()
+        c = funcion(*args, **kwargs)
+        print(time.time() - inicio)
+        return c
+    return funcion_medida
+
+@mide_tiempo
 @login_required
 def dashboard_padron_general(request):
     context = {'dashboad':dash_padron_nominal()}
