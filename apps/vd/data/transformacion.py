@@ -9,6 +9,20 @@ def change_rango_edad(x):
             return '3 - 5 meses'
         elif x == 2:
             return '6 - 12 meses'
+
+def column_completo(x):
+    if x == '':
+        return 'Vacio'
+    else:
+        return 'Completado'
+
+def estado_registro(x):
+    if x == 0:
+        return 'INACTIVO'
+    elif x == 1:
+        return 'ACTIVO'
+    elif x == 2:
+        return 'ACTIVO OBSERVADO'
         
 def clean_columns_padron(dataframe = pd.DataFrame()):
     dff = dataframe.drop(DROP_COLUMNAS_PADRON, axis=1)
@@ -63,6 +77,103 @@ def clean_columns_padron(dataframe = pd.DataFrame()):
     })
     dff['Doc_num_jefefamilia_padron']=dff['Doc_num_jefefamilia_padron'].astype('string')
     return dff
+def transform_padron(dff = pd.DataFrame()):
+    dff[['CNV', 'CUI', 'DNI']]=dff[['CNV', 'CUI', 'DNI']].fillna(0)#.astype('int')
+    dff[['CNV', 'CUI', 'DNI']]=dff[['CNV', 'CUI', 'DNI']].astype('int')
+    dff['Documento']= dff.apply(lambda x: documento_unique(x['CNV'], x['CUI'],x['DNI'],x['COD_PADRON'],'DOC'),axis=1)
+    dff['Tipo de Documento'] = dff.apply(lambda x: documento_unique(x['CNV'], x['CUI'],x['DNI'],x['COD_PADRON'],'TIPO'),axis=1)
+    dff[['AP_MENOR', 'AM_MENOR', 'NOMBRES_MENOR']]=dff[['AP_MENOR', 'AM_MENOR', 'NOMBRES_MENOR']].fillna('')
+    dff['Datos Niño'] = dff.apply(lambda x: concatenar_datos(x['AP_MENOR'], x['AM_MENOR'],x['NOMBRES_MENOR']),axis=1)
+    dff[['AP_MADRE_MENOR', 'AM_MADRE_MENOR', 'NOMBRES_MADRE_MENOR']]=dff[['AP_MADRE_MENOR', 'AM_MADRE_MENOR', 'NOMBRES_MADRE_MENOR']].fillna('')
+    dff['Madre de Familia'] = dff.apply(lambda x: concatenar_datos(x['AP_MADRE_MENOR'], x['AM_MADRE_MENOR'],x['NOMBRES_MADRE_MENOR']),axis=1)
+    dff[['AP_JEFEFAMILIA_MENOR','AM_JEFEFAMILIA_MENOR', 'NOMBES_JEFEFAMILIA_MENOR']]=dff[['AP_JEFEFAMILIA_MENOR','AM_JEFEFAMILIA_MENOR', 'NOMBES_JEFEFAMILIA_MENOR']].fillna('')
+    dff['Jefe de Familia'] = dff.apply(lambda x: concatenar_datos(x['AP_JEFEFAMILIA_MENOR'], x['AM_JEFEFAMILIA_MENOR'],x['NOMBES_JEFEFAMILIA_MENOR']),axis=1)
+    dff['Doc_num_jefefamilia_padron']=dff['Doc_num_jefefamilia_padron'].astype('string')
+    dff['Doc_num_madre_padron'] = dff['Doc_num_madre_padron'].astype('string')
+    dff['Doc_num_madre_padron'] = dff['Doc_num_madre_padron'].fillna('')
+    dff['Doc_num_madre_padron'] = dff['Doc_num_madre_padron'].replace([np.nan],[''])
+    
+    dff['Referencia_direccion_padron'] = dff['Referencia_direccion_padron'].fillna('')
+    dff['Eje_vial']=dff['Eje_vial'].replace(' ','')
+    dff['Estado Eje Vial']= dff.apply(lambda x: column_completo(x['Eje_vial']),axis=1)
+    dff['Estado Referencias']= dff.apply(lambda x: column_completo(x['Referencia_direccion_padron']),axis=1)
+    #Estado_registro
+    dff['Estado_registro']= dff.apply(lambda x: estado_registro(x['Estado_registro']),axis=1)
+    
+    dff['Fecha_creacion_registro'] = pd.to_datetime(dff['Fecha_creacion_registro'], format="%d/%m/%Y")
+    #Fecha de modificación de Registro
+    dff['Fecha_Nacimiento'] = pd.to_datetime(dff['Fecha_Nacimiento'].str.strip(), format="%d/%m/%Y")
+    dff['Dia'] = dff['Fecha_Nacimiento'].dt.day
+    dff['Mes Num'] = dff['Fecha_Nacimiento'].dt.month
+    dff['Mes']=dff['Mes Num']
+    dff['Mes']=dff['Mes'].replace(1,'Enero')
+    dff['Mes']=dff['Mes'].replace(2,'Febrero')
+    dff['Mes']=dff['Mes'].replace(3,'Marzo')
+    dff['Mes']=dff['Mes'].replace(4,'Abril')
+    dff['Mes']=dff['Mes'].replace(5,'Mayo')
+    dff['Mes']=dff['Mes'].replace(6,'Junio')
+    dff['Mes']=dff['Mes'].replace(7,'Julio')
+    dff['Mes']=dff['Mes'].replace(8,'Agosto')
+    dff['Mes']=dff['Mes'].replace(9,'Setiembre')
+    dff['Mes']=dff['Mes'].replace(10,'Octubre')
+    dff['Mes']=dff['Mes'].replace(11,'Noviembre')
+    dff['Mes']=dff['Mes'].replace(12,'Diciembre')
+    dff['Año'] =dff['Fecha_Nacimiento'].dt.year
+    
+    dff['Semana_'] = dff['Fecha_Nacimiento'].dt.isocalendar().week.astype(int)
+    dff['Semana'] = dff.apply(lambda x: semana_text(x['Año'], x['Semana_']),axis=1)
+    dff['Trimestre_'] =dff['Fecha_Nacimiento'].dt.quarter
+    dff['Trimestre'] = dff.apply(lambda x: trimestre_text(x['Año'], x['Trimestre_']),axis=1)
+    dff['EESS_atencion_padron'] = dff['EESS_atencion_padron'].replace([np.nan],['No Especificado'])
+    dff = dff.rename(columns = {
+       'COD_PADRON': 'Código Padrón', 
+       'Estado_tramite_DNI': 'Estado de Tramite DNI',
+       'Fecha_tramite_DNI': 'Fecha de Tramite DNI', 
+       'AP_MENOR': 'Apellido Paterno', 
+       'AM_MENOR': 'Apellido Materno', 
+       'NOMBRES_MENOR':'Nombres',
+       'Fecha_Nacimiento': 'Fecha de Nacimiento', 
+       'Eje_vial': 'Eje Vial', 
+       'Direccion_padron': 'Dirección',
+       'Referencia_direccion_padron': 'Referencia de Dirección', 
+       'Nombre_cp': 'Centro Poblado', 
+       'Tipo_cp': 'Tipo de Centro Poblado',
+       'Estado_visita': 'Estado de Visita',
+       'Estado_encontrado': 'Estado Encontrado', 
+       'Fecha_visita':'Fecha de Visita', 
+       'Fuente_datos':'Fuente de Datos',
+       'Fecha_fuente_datos' : 'Fecha de Fuente de Datos', 
+       'EESS_nacimiento_padron': 'Establecimiento de Salud de Nacimiento', 
+       'EESS_atencion_padron': 'Establecimiento de Salud de Atención',
+       'Frecuenta_atencion_padron': 'Frecuencia de Atención', 
+       'EESS_adscripcion_padron':'Establecimiento de Salud de Adscripción', 
+       'Tipo_Seguro': 'Tipo de Seguro',
+       'Programas_Sociales': 'Programas Sociales', 
+       'Tipo_doc_madre_padron': 'Tipo de Documento - Madre', 
+       'Doc_num_madre_padron':'Número Documento - Madre',
+       'AP_MADRE_MENOR': 'Apellido Paterno - Madre', 
+       'AM_MADRE_MENOR': 'Apellido Materno - Madre', 
+       'NOMBRES_MADRE_MENOR': 'Nombres - Madre',
+       'Num_cel_madre_padron': 'Número de Celular', 
+       'Correo_madre_padron': 'Correo Electronico',
+       'Grado_instruccion_madre_padron':'Grado de Instrucción', 
+       'Lengua_madre_padron':'Lenguaje - Madre',
+       'Tipo_doc_jefefamilia_padron': 'Tipo de Documento - Jefe de Familia', 
+       'Doc_num_jefefamilia_padron':'Número Documento - Jefe de Familia',
+       'AP_JEFEFAMILIA_MENOR':'Apellido Paterno - Jefe de Familia', 
+       'AM_JEFEFAMILIA_MENOR':'Apellido Materno - Jefe de Familia',
+       'NOMBES_JEFEFAMILIA_MENOR':'Nombres - Jefe de Familia', 
+       'Estado_registro':'Estado de Registro',
+       'Fecha_creacion_registro':'Fecha de Creación de Registro', 
+       'Usuario_creacion_registro': 'Usuario Creador de Registro',
+       'Fecha_modificacion_registro': 'Fecha de modificación de Registro', 
+       'Usuario_modifica_registro': 'Usuario Modifica',
+       'Entidad_Actualiza':'Entidad Actualiza', 
+       'Tipo_registro':'Tipo de Registro', 
+       
+    })
+    return dff 
+
 
 def clean_columns_c1(dataframe = pd.DataFrame()):
     dff = dataframe.drop(DROP_COLUMNAS_C1, axis=1)

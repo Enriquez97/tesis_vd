@@ -58,3 +58,5 @@ COLUMNAS_COMPROMISO_1 = ['External ID',
 DROP_VD_DETALLADO= ['External ID','Nombre a mostrar','Dispositivo','Duración','Meses','Motivo de límite excedido','Nombre de la madre','Dni de la madre']
 
 EESS_TRUJILLO=['LIBERTAD', 'CLUB DE LEONES', 'LOS GRANADOS "SAGRADO CORAZON"','LOS JARDINES', 'SAN MARTIN DE PORRES', 'PESQUEDA II', 'EL BOSQUE','ARANJUEZ', 'CENTRO DE SALUD LA UNION', 'PESQUEDA III']
+
+LISTA_COLORES_BAR = px.colors.diverging.Portland+px.colors.diverging.Earth+px.colors.diverging.balance+px.colors.diverging.Tealrose+px.colors.qualitative.Plotly+px.colors.qualitative.Dark24+px.colors.qualitative.Light24+px.colors.qualitative.Alphabet

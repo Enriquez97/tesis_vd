@@ -15,38 +15,43 @@ image_svdo = 'https://allinkawsay.ins.gob.pe/wp-content/uploads/2020/09/visita-d
 image_svdc = 'https://img.freepik.com/vector-gratis/ilustracion-concepto-mensajero_114360-1156.jpg?size=338&ext=jpg&ga=GA1.1.386372595.1697760000&semt=ais'
 image_svdg = 'https://esarco.es/wp-content/uploads/2020/05/certificado-coordenadas-georreferenciadas.png'
 imagen_rvd = 'https://previews.123rf.com/images/lembergvector/lembergvector2112/lembergvector211200033/178732022-proceso-de-medici%C3%B3n-de-indicadores-clave-de-desempe%C3%B1o-de-la-empresa-resultados-estrat%C3%A9gicos-y.jpg'
-
-
+imagen_padron = 'https://padronnominal.reniec.gob.pe/padronn/resources-1.4.9/img/portada_v2.png'
+imagen_ingesta_h ='https://www.xeridia.com/wp-content/uploads/2022/01/integracion-datos.png'
 def dash_home():
     app = DjangoDash('home', external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([
     Row([
         Column([
             card_index(
-                    img = image_ingesta,
-                    title_card= "Ingesta de Datos",
-                    url = '/ingesta-any'
+                    img = imagen_ingesta_h,
+                    title_card= "Ingesta de Datos Historicos",
+                    url = '/ingesta-historico',
+                    tipo='Ingesta'
             )
         ], size=3),
+        
         Column([
             card_index(
-                img = image_organizar,
-                title_card= "Organización de VD", 
-                url = '/unir-data'
+                    img = image_ingesta,
+                    title_card= "Ingesta de Datos",
+                    url = '/ingesta-any',
+                    tipo='Ingesta'
             )
         ], size=3),
         Column([
             card_index(
                 img = image_vd,
-                title_card= "Dashboard de Visitas Domiciliarias",
-                url = '/vd_detalle_resultados'
+                title_card= "Visitas Domiciliarias Ejecutadas",
+                url = '/vd_detalle_resultados',
+                tipo='Dashboard'
             )
         ], size=3),
         Column([
             card_index(
-                img = image_seguimiento,
-                title_card= "Análisis VD con Padrón", 
-                url= '/analisis-report-vd'
+                img = imagen_padron,
+                title_card= "Padrón Nominal",
+                url = '/padron',
+                tipo='Dashboard'
             )
         ], size=3),
     ]),
@@ -54,29 +59,33 @@ def dash_home():
         Column([
             card_index(
                 img = image_svdo,
-                title_card= "Seguimiento Visitas Oportunas",
-                url = '/vd-oportunas'
+                title_card= "Visitas Oportunas",
+                url = '/vd-oportunas',
+                tipo='Dashboard'
             )
         ], size=3),
         Column([
             card_index(
                 img = image_svdc,
-                title_card= "Seguimiento Visitas Consecutivas", 
-                url = '/vd-consecutivas'
+                title_card= "Visitas Consecutivas", 
+                url = '/vd-consecutivas',
+                tipo='Dashboard'
             )
         ], size=3),
         Column([
             card_index(
                 img = image_svdg,
-                title_card= "Seguimiento Visitas Georreferenciadas", 
-                url = '/vd-georreferenciadas'
+                title_card= "Visitas Georreferenciadas", 
+                url = '/vd-georreferenciadas',
+                tipo='Dashboard'
             )
         ], size=3),
         Column([
             card_index(
                 img = imagen_rvd,
-                title_card= "Resultados Visitas Resultados", 
-                url= '/dashboard-seguimiento'
+                title_card= "Visitas - Resultados", 
+                url= '/dashboard-seguimiento',
+                tipo='Dashboard'
             )
         ], size=3),
     ]),

@@ -145,7 +145,7 @@ def dash_concatenar_data():
         pnominal_df = pnominal_bq_df[pnominal_bq_df['Fecha_Carga']==filter_pnominal]
         fecha_last_pnominal = str(max(pnominal_df['Fecha_creacion_registro'].unique()))[:10]
         cvd_df = cvd_bq_df[cvd_bq_df['Fecha_Carga']==filter_cvd]
-        print(cvd_df)
+        
         #periodo = str(cvd_df['Periodo_VD'].unique()[0])
         periodo = str(cvd_df['Periodo_VD'].unique()[0])
         cvd_detalle_df =cvd_detalle_bq_df[cvd_detalle_bq_df['Periodo_VD']==filter_vd_detalle]

@@ -13,7 +13,7 @@ urlpatterns = [
         
         
         path("ingesta-any", views.ingesta_any, name="ingesta_any"),
-        path("ingesta", views.ingesta_periodo, name="ingesta_periodo"),
+        path("ingesta-historico", views.ingesta_periodo, name="ingesta_periodo"),
         
         
         path("dashboard-seguimiento", views.dashboard_seguimiento_indicadores, name="dashboard_seguimiento"),

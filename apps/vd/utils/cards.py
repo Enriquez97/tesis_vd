@@ -112,7 +112,7 @@ def cardSection(id_value = '',shadow='xl', radius='md', border =  True, text = '
 
         )
 
-def card_index( img = '', title_card = '', description = '', url = ''):
+def card_index( img = '', title_card = '', description = '', url = '', tipo = ''):
     
     return Div([dmc.Card(
         children=[
@@ -122,7 +122,7 @@ def card_index( img = '', title_card = '', description = '', url = ''):
             dmc.Group(
                 [
                     dmc.Text(title_card, weight=500,size="lg"),
-                    dmc.Badge("habilitado", color="green", variant="light"),
+                    dmc.Badge(tipo, color="green", variant="light"),
                 ],
                 position="apart",
                 mt="md",

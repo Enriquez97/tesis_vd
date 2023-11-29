@@ -9,9 +9,6 @@ def bq_pnominal_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.pnominal`"):
                                     project_id = 'ew-tesis',
                                     credentials = bq_cred,
                                     dialect = 'standard')
-    #pnominal_bq_df['Fecha_Carga']=pnominal_bq_df['Fecha_Carga'].astype('string')
-    #pnominal_bq_df['Fecha_Carga'] = pnominal_bq_df['Fecha_Carga'].str[:19]
-    pnominal_bq_df['Fecha_creacion_registro'] = pd.to_datetime(pnominal_bq_df['Fecha_creacion_registro'], format="%d/%m/%Y")
     return pnominal_bq_df
 
 # DATA UNICA DEL ULTIMO MES DE CARGA VD

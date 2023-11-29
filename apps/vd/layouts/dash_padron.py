@@ -15,11 +15,10 @@ from apps.vd.utils.functions import dataframe_filtro, validar_all_none
 from apps.vd.utils.cards import cardGraph
 from apps.vd.utils.figures import line_figure,pie_figure, bar_go_figure
 import dash_ag_grid as dag
-import datetime
-import os
-
-from apps.vd.data.transformacion import clean_columns_padron, clean_columns_c1
-
+from datetime import datetime, date, timedelta
+from ...vd.data.lectura import *
+from apps.vd.data.transformacion import clean_columns_padron, clean_columns_c1,transform_padron
+from ..constans import LISTA_COLORES_BAR
 #from apps.vd.data.lectura import padron_dataframe_bq#padron_dataframe_bq
 #print(padron_dataframe_bq)
 def dash_carga_padron():
@@ -202,15 +201,38 @@ if n_click_guardar:
                     data_parquet_df = pd.read_parquet('p_data.parquet', engine='pyarrow')
                     data_parquet_df._append(meta_df,ignore_index=True) 
 """
+from ..data.lectura import bq_pnominal_df
+#padron_df = bq_pnominal_df()
+#padron_df = transform_padron(dff = padron_df)
+#print(padron_df.columns)
 
 def dash_padron_nominal():
+    select_carga = bq_fcarga_pnominal_df()
+    select_ = select_carga['Fecha_Carga'].unique()
     app = DjangoDash('padron-general',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([
         Row([
-            Column([title(content='Padrón Nominal',order=1)],size=4),
-            Column([multiSelect(id='multiselect-year',texto='Años',data = [])],size=3),
+            Column([title(content='Padrón Nominal',order=1)],size=12),
+            
+        ]),
+        Row([
+            
+            Column([
+                datepicker_(text = 'Rango Inicio', tipo = 'inicio')
+                  
+            ],size=2), 
+            Column([
+                datepicker_(text = 'Rango Fin', tipo = 'fin')
+            ],size=2), 
             Column([select(id='select-eess',texto='EESS de Atención',searchable=True)],size=3),
             Column([select(id='select-entidadUpdate',texto='Entidad Actualiza Registro',searchable=True)],size=2),
+            Column([
+                select(id='select-reporte-carga', data = select_,texto='Fecha de Carga de Fuente de Datos', value= select_[-1], clearable=False)
+            ],size=2),
+            Column([
+               btnDownload()
+            ],size=1)
+            
         
         ]),
         Row([
@@ -224,69 +246,90 @@ def dash_padron_nominal():
                               {'label':'Año','value':'Año'},
                         ]
                 ),
-                loadingOverlay(cardGraph(id_graph = 'line-st',height=300))
+                loadingOverlay(cardGraph(id_graph = 'line-st',height=350))
             ],size=6),
             Column([
                 segmented(id='segmented-pie',value = 'Entidad Actualiza',
                           data =[
                               
                               {'label':'Entidad Actualiza','value':'Entidad Actualiza'},
-                              {'label':'Frecuenta de Atención','value':'Frecuenta_atencion_padron'},
-                              {'label':'Estado Encontrado','value':'Estado_encontrado'},
-                              {'label':'Tipo Documento Niño','value':'Tipo Documento Padron'},
-                              {'label':'Tipo Documento Madre','value':'Tipo_doc_madre_padron'},
+                              {'label':'Frecuencia de Atención','value':'Frecuencia de Atención'},
+                              {'label':'Estado Encontrado','value':'Estado Encontrado'},
+                              {'label':'Tipo de Documento','value':'Tipo de Documento'},
+                              {'label':'Tipo Documento Madre','value':'Tipo de Documento - Madre'},
                               #{'label':'Sexo','value':'Sexo'},
                         ]
                 ),
-                loadingOverlay(cardGraph(id_graph = 'pie',height=300))
+                loadingOverlay(cardGraph(id_graph = 'pie',height=350))
             
             ],size=6),
         ]),
         Row([
             Column([
-                segmented(id='segmented-eess',value = 'EESS_nacimiento_padron',
+                segmented(id='segmented-eess',value = 'Establecimiento de Salud de Atención',
                           data =[
-                              {'label':'EESS de Salud','value':'EESS_nacimiento_padron'},
-                              {'label':'EESS de Atención','value':'EESS_atencion_padron'},
-                              {'label':'EESS de Adscripción','value':'EESS_adscripcion_padron'},
+                              {'label':'EESS de Nacimiento','value':'Establecimiento de Salud de Nacimiento'},
+                              {'label':'EESS de Atención','value':'Establecimiento de Salud de Atención'},
+                              {'label':'EESS de Adscripción','value':'Establecimiento de Salud de Adscripción'},
                               
                         ]
                 ),
                 loadingOverlay(cardGraph(id_graph = 'bar-eess',height=400))
-            ],size=6),
+            ],size=4),
             Column([
-                
+                loadingOverlay(cardGraph(id_graph = 'pie-estado-registro',height=435))
             
-            ],size=6),
+            ],size=2),
+            Column([
+                loadingOverlay(cardGraph(id_graph = 'pie-ejevial',height=435))
+            
+            ],size=3),
+            Column([
+                loadingOverlay(cardGraph(id_graph = 'pie-ref',height=435))
+            
+            ],size=3),
         
         
         ]),
         Div(id='notifications-update-data'),
         Store(id='data-values'),
+        dcc.Download(id="descargar")
     ])
-    """
+
     @app.callback(
                     Output('select-eess','data'),
                     Output('select-entidadUpdate','data'),
                     Output("data-values","data"),
                     Output("notifications-update-data","children"),
-                    Input('multiselect-year','value'),
+                    Input('select-reporte-carga','value'),
+                    Input('datepicker-inicio','value'),
+                    Input('datepicker-fin','value'),
                     Input('select-eess','value'),
                     Input('select-entidadUpdate','value'),
     )
     def update_filtro_data(*args):
-        padron_df_dash['Año'] = padron_df_dash['Año'].astype('string')
-        if validar_all_none(variables = (args)) == True:
-            df=padron_df_dash.copy()
+        
+        pnominal_df = bq_pnominal_df(query = f"SELECT * FROM `ew-tesis.dataset_tesis.pnominal`WHERE Fecha_Carga = '{args[0]}'")
+        print('here')
+        df = transform_padron(dff=pnominal_df)
+        print(df)
+        #datepicker_inicio = datetime.strptime(args[1], "%d/%m/%Y").date()
+        #print(datepicker_inicio)
+        #datepicker_fin = datetime.strptime(args[2], "%d/%m/%Y").date()
+        #print(datepicker_fin)
+        
+        dff = df[(df['Fecha de Nacimiento']>=args[1])&(df['Fecha de Nacimiento']<=args[2])]
+        if validar_all_none(variables = (args[3:])) == True:
+            dfff=dff.copy()
         else:
-            df=padron_df_dash.query(dataframe_filtro(values=list(args),columns_df=['Año','EESS_atencion_padron','Entidad Actualiza']))
+            dfff=dff.query(dataframe_filtro(values=list(args[3:]),columns_df=['Establecimiento de Salud de Atención','Entidad Actualiza']))
         
         #anio=[{'label': i, 'value': i} for i in df['Año'].unique()]
         return [
-            [{'label': i, 'value': i} for i in df['EESS_atencion_padron'].unique()],
-            [{'label': i, 'value': i} for i in df['Entidad Actualiza'].unique()],
-            df.to_dict('series'),
-            notification(text=f'Se cargaron {len(df)} filas',title='Update')
+            [{'label': i, 'value': i} for i in dfff['Establecimiento de Salud de Atención'].unique()],
+            [{'label': i, 'value': i} for i in dfff['Entidad Actualiza'].unique()],
+            dfff.to_dict('series'),
+            notification(text=f'Se cargaron {len(dfff)} filas',title='Update')
         ]
 
     @app.callback(
@@ -299,16 +342,17 @@ def dash_padron_nominal():
        df = pd.DataFrame(data) 
        print(df)
        if segmented == 'Mes':
-            st_df=df.groupby([segmented,'Mes_'])[['Tipo Documento Padron']].count().sort_values('Mes_').reset_index()
+            st_df=df.groupby([segmented,'Mes Num'])[['Tipo de Documento']].count().sort_values('Mes Num').reset_index()
        else:
-            st_df=df.groupby([segmented])[['Tipo Documento Padron']].count().reset_index()
+            st_df=df.groupby([segmented])[['Tipo de Documento']].count().reset_index()
        print(st_df)
        return line_figure(df = st_df, 
                           x = [segmented], 
-                          y = 'Tipo Documento Padron',
-                          height = 300, 
+                          y = 'Tipo de Documento',
+                          height = 350, 
                           x_title = 'Fecha',
                           y_title = 'Número de Niños Nacidos',
+                          title=' N° de Niños Nacidos'
                           
         )
     
@@ -328,8 +372,11 @@ def dash_padron_nominal():
                          label_col= segmented, 
                          value_col = 'Fecha de Nacimiento',
                          title = segmented,
-                         height=300)
-    
+                         height=350,
+                         textposition = 'inside',
+                         textfont_size=13,
+                         list_or_color=['#71dbd2','#eeffdb','#ade4b5','#d0eaa3','#fff18c'])
+
     @app.callback(
                     Output('bar-eess','figure'),
                     Input("data-values","data"),
@@ -339,15 +386,70 @@ def dash_padron_nominal():
     def update_graph_bar(data,segmented):
         df = pd.DataFrame(data) 
         df[segmented]=df[segmented].fillna('Sin Registro')
-        dff=df.groupby([segmented])[['Tipo Documento Padron']].count().sort_values('Tipo Documento Padron').reset_index()
+        dff=df.groupby([segmented])[['Tipo de Documento']].count().sort_values('Tipo de Documento').reset_index()
+        dff = dff[dff['Tipo de Documento']>3]
         return bar_go_figure(df = dff, 
-                             x = 'Tipo Documento Padron',
+                             x = 'Tipo de Documento',
                              y = segmented,
                              orientation='h',
                              height = 400, 
                              title = segmented,
-                             text='Tipo Documento Padron',
+                             text='Tipo de Documento',
                              xaxis_title='N° de Niños',
-                             yaxis_title='Establecimiento de Salud'
+                             yaxis_title='Establecimiento de Salud',
+                             list_colors=LISTA_COLORES_BAR
+                             
         )
-        """
+    @app.callback(
+                    Output('pie-estado-registro','figure'),
+                    Output('pie-ejevial','figure'),
+                    Output('pie-ref','figure'),
+                    Input("data-values","data"),             
+    )
+    def update_graph_pie_2(data):
+        df = pd.DataFrame(data)
+        estado_reg_df=df.groupby(['Estado de Registro'])[['Tipo de Documento']].count().reset_index() 
+        estado_eje_df=df.groupby(['Estado Eje Vial'])[['Tipo de Documento']].count().reset_index() 
+        estado_ref_df=df.groupby(['Estado Referencias'])[['Tipo de Documento']].count().reset_index()
+         
+        return[
+            pie_figure(df = estado_reg_df, 
+                         label_col= 'Estado de Registro', 
+                         value_col = 'Tipo de Documento',
+                         title = 'Estado de Registro',
+                         height=435,
+                         list_or_color = ['#8eb2c5','#f98f6f'],
+                         textfont_size=15,
+                         showlegend=False
+                        ),
+            pie_figure(df = estado_eje_df, 
+                         label_col= 'Estado Eje Vial', 
+                         value_col = 'Tipo de Documento',
+                         title = 'Estado Eje Vial',
+                         height=435,
+                         list_or_color = ['#079ea6','#19274e'],
+                         textfont_size=15
+                        ),
+            pie_figure(df = estado_ref_df, 
+                         label_col= 'Estado Referencias', 
+                         value_col = 'Tipo de Documento',
+                         title = 'Estado Referencias',
+                         height=435,
+                         list_or_color = ['#a85163','#b4dec1'],
+                         textfont_size=15
+                         ),
+        ]
+    @app.callback(
+            
+            Output("descargar", "data"),
+            Input("data-values","data"),
+            Input("btn-download", "n_clicks"),
+            prevent_initial_call=True,
+            
+            )
+    def update_download(data,n_clicks_download):
+        options=pd.DataFrame(data)
+        #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
+        if n_clicks_download:
+            return dcc.send_data_frame( options.to_excel, "padron.xlsx", sheet_name="Sheet_name_1",index =False)
+        

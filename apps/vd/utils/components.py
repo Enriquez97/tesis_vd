@@ -3,6 +3,7 @@ from dash import html,dcc
 from dash_iconify import DashIconify
 import dash_bootstrap_components as dbc
 from datetime import datetime, date, timedelta
+import pandas as pd
 
 def title(order = 2, align = 'center', content = '',id = '-' ):
     return dmc.Title(children = content,order = order,align = align, id = id)
@@ -282,3 +283,19 @@ def btnDownload(
                                 mb=10,
                             ),
             )
+        
+def datepicker_(text = '', tipo = 'inicio'):
+    fecha_now = date(datetime.now().year,datetime.now().month,datetime.now().day)
+    fecha_inicio = date(int(datetime.now().year)-6,datetime.now().month,datetime.now().day)
+    text_id = 'inicio' if tipo == 'inicio' else 'fin'
+    if  tipo == 'inicio':
+        value_datepicker = date(datetime.now().year,1,1)
+    else:
+        value_datepicker = fecha_now
+        
+    return datePicker(id=f'datepicker-{text_id}',
+                                    text = text,
+                                    value = value_datepicker,
+                                    minimo = fecha_inicio,
+                                    maximo = fecha_now,
+                                    )

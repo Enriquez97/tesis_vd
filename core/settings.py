@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -95,11 +95,11 @@ ASGI_APPLICATION='core.routing.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':  'dashboard_vd',
+        'NAME':  'railway',
         'USER':'root',
-        'PASSWORD':'H6bB3h4ac53DHD4a3e13cAHG-46D2aAc',
-        'HOST': 'viaduct.proxy.rlwy.net',
-        'PORT':'20730'
+        'PASSWORD':'CAHc3413-C5EghHFDBf5a43G1dHge1c2',
+        'HOST': 'monorail.proxy.rlwy.net',
+        'PORT':'31205'
     }
     #'default': {
     #    'ENGINE': 'django.db.backends.mysql',
