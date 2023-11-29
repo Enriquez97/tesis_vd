@@ -209,7 +209,11 @@ from ..data.lectura import bq_pnominal_df
 
 
 def dash_padron_nominal():
+    print('DASHBOARD - PADRON NOMINAL')
+    print('Consulta de BG')
     select_carga = bq_fcarga_pnominal_df()
+    print('termina consulta')
+    print('Crear Objeto DjangoDash')
     select_ = select_carga['Fecha_Carga'].unique()
     app = DjangoDash('padron-general',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([
@@ -297,7 +301,8 @@ def dash_padron_nominal():
         Store(id='data-values'),
         dcc.Download(id="descargar")
     ])
-
+    print('Se ejecutan los callbacks')
+    
     @app.callback(
                     Output('select-eess','data'),
                     Output('select-entidadUpdate','data'),
@@ -310,7 +315,7 @@ def dash_padron_nominal():
                     Input('select-entidadUpdate','value'),
     )
     def update_filtro_data(*args):
-        
+        print('Callback de filtrado de data')
         pnominal_df = bq_pnominal_df(query = f"SELECT * FROM `ew-tesis.dataset_tesis.pnominal`WHERE Fecha_Carga = '{args[0]}'")
         df = transform_padron(dff=pnominal_df)
         dff = df[(df['Fecha de Nacimiento']>=args[1])&(df['Fecha de Nacimiento']<=args[2])]
@@ -326,7 +331,7 @@ def dash_padron_nominal():
             dfff.to_dict('series'),
             notification(text=f'Se cargaron {len(dfff)} filas',title='Update')
         ]
-
+    
     @app.callback(
                     Output('line-st','figure'),
                     Input("data-values","data"),
@@ -334,6 +339,7 @@ def dash_padron_nominal():
                     
     )
     def update_graph_linea(data,segmented):
+       print('Callback de Segmented-Linechart')
        df = pd.DataFrame(data) 
        if segmented == 'Mes':
             st_df=df.groupby([segmented,'Mes Num'])[['Tipo de Documento']].count().sort_values('Mes Num').reset_index()
@@ -356,6 +362,7 @@ def dash_padron_nominal():
                     
     )
     def update_graph_pie(data,segmented):
+       print('Callback de Segmented-Piechart')
        df = pd.DataFrame(data) 
        df[segmented]=df[segmented].fillna('Sin Registro')
        
@@ -369,7 +376,8 @@ def dash_padron_nominal():
                          textposition = 'inside',
                          textfont_size=13,
                          list_or_color=['#71dbd2','#eeffdb','#ade4b5','#d0eaa3','#fff18c'])
-
+       
+    
     @app.callback(
                     Output('bar-eess','figure'),
                     Input("data-values","data"),
@@ -377,6 +385,7 @@ def dash_padron_nominal():
                     
     )
     def update_graph_bar(data,segmented):
+        print('Callback de Segmented-Barchart')
         df = pd.DataFrame(data) 
         df[segmented]=df[segmented].fillna('Sin Registro')
         dff=df.groupby([segmented])[['Tipo de Documento']].count().sort_values('Tipo de Documento').reset_index()
@@ -393,6 +402,7 @@ def dash_padron_nominal():
                              list_colors=LISTA_COLORES_BAR
                              
         )
+    
     @app.callback(
                     Output('pie-estado-registro','figure'),
                     Output('pie-ejevial','figure'),
@@ -400,6 +410,7 @@ def dash_padron_nominal():
                     Input("data-values","data"),             
     )
     def update_graph_pie_2(data):
+        print('Callback de Piecharts')
         df = pd.DataFrame(data)
         estado_reg_df=df.groupby(['Estado de Registro'])[['Tipo de Documento']].count().reset_index() 
         estado_eje_df=df.groupby(['Estado Eje Vial'])[['Tipo de Documento']].count().reset_index() 
@@ -432,6 +443,7 @@ def dash_padron_nominal():
                          textfont_size=15
                          ),
         ]
+    
     @app.callback(
             
             Output("descargar", "data"),
@@ -441,6 +453,7 @@ def dash_padron_nominal():
             
             )
     def update_download(data,n_clicks_download):
+        print('Callback Descargar data')
         options=pd.DataFrame(data)
         if n_clicks_download:
             return dcc.send_data_frame( options.to_excel, "padron.xlsx", sheet_name="Sheet_name_1",index =False)

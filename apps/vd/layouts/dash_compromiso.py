@@ -251,17 +251,18 @@ def table_dag(df = pd.DataFrame):
                     )])
 
 def dashboard_indicadores_vd():
+    print('DASHBOARD - VD GEO')
+    print('Consulta de BG')
     historico_vd_df = bq_cvd_detalle_df()
     historico_vd_df = historico_vd_df[historico_vd_df['Rango_de_Edad']=='3 - 5 meses']
     historico_cargados_df = bq_historico_carga_vd() 
     historico_cargados_df['Anio_Periodo'] = historico_cargados_df['Anio_Periodo'].astype('string')
     historico_cargados_df['Periodo_VD'] = historico_cargados_df['Anio_Periodo']+'-'+historico_cargados_df['Mes_Periodo']
     historico_cargados_df = historico_cargados_df[historico_cargados_df['Rango_de_Edad']=='3 - 5 meses']
-    #historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = historico_vd_df, tipo = 'vd')
-    print(historico_vd_df.columns)
-    #print(historico_vd_dff.columns)
-    periodos = historico_vd_df['Periodo_VD'].unique()
     
+    periodos = historico_vd_df['Periodo_VD'].unique()
+    print('termina consulta')
+    print('Crear Objeto DjangoDash')
     
     app = DjangoDash('dashboard-seguimiento-indicadores',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([
@@ -332,7 +333,7 @@ def dashboard_indicadores_vd():
         dcc.Download(id="descargar")
         
     ])
-    
+    print('Se ejecutan los callbacks')
     @app.callback(
                 Output('table-dag-resultados', 'rowData'),
                 Output('table-dag-resultados', 'columnDefs'),
@@ -346,6 +347,7 @@ def dashboard_indicadores_vd():
                 Input('multiselect-periodo', 'value'),
                 )
     def update_data_resultados(periodos):
+        print('Callback de ALL RESULTADOS')
         if periodos == None or periodos == []:
             cargados_all_df = historico_cargados_df[historico_cargados_df['Periodo_VD'] == periodos]
             vd_all_df = historico_vd_df[historico_vd_df['Periodo_VD'] == periodos]
@@ -387,6 +389,7 @@ def dashboard_indicadores_vd():
             
             )
     def update_download(data,n_clicks_download):
+        print('Callback Descargar data')
         options=pd.DataFrame(data)
         #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
         if n_clicks_download:

@@ -15,10 +15,14 @@ from ..utils.global_callback import callback_opened_modal
 
 
 def dash_indicador_resultados():
+    print('DASHBOARD - VD RESULTADOS')
+    print('Consulta de BG')
     dff = bq_cvd_reporte_df()
     vd_detalle_df = change_columns_vdetalle(df = dff)
     
     carga_list = vd_detalle_df['Fecha_Carga'].unique()
+    print('termina consulta')
+    print('Crear Objeto DjangoDash')
     app = DjangoDash('vd_detalle_resultados',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.css.append_css({ "external_url" : "/static/assets/css/dashstyle.css" })
     app.layout = Container([
@@ -68,6 +72,7 @@ def dash_indicador_resultados():
         Div(id='notifications-update-data'),
         Store(id='data-values'),
     ])
+    print('Se ejecutan los callbacks')
     @app.callback(               
                 #Output('select-eess','data'),
                 #Output('select-dispositivo','data'),
@@ -77,7 +82,8 @@ def dash_indicador_resultados():
                 Input('select-eess','value'), 
                 Input('select-dispositivo','value'),         
     )
-    def update_filters(carga,eess,dispositivo):#
+    def update_filters(carga,eess,dispositivo):
+        print('Callback de filtrado de data')
         vd_df = vd_detalle_df[vd_detalle_df['Fecha_Carga']==carga]
         if (eess == None or len(eess) == 0) and dispositivo == None:
             filt_df = vd_df.copy()
@@ -103,6 +109,7 @@ def dash_indicador_resultados():
                 Input('data-values','data'),        
     )
     def update_graficos(data):
+        print('Callback de ALL-GRAFICOS')
         data_df = pd.DataFrame(data)
         #gauge
         total_vd_realizar = calcular_total_vd(data_df)
@@ -141,6 +148,8 @@ def dash_indicador_resultados():
 
 def dash_indicador_vd_oportunas():
     #historico
+    print('DASHBOARD - VD OPORTUNAS')
+    print('Consulta de BG')
     historico_vd_df=bq_historico_carga_vd()
     vd_carga_dff = bq_cvd_df()
     #
@@ -148,6 +157,8 @@ def dash_indicador_vd_oportunas():
     cvd_reporte_df = bq_cvd_reporte_df() 
     
     periodos = periodos_list()
+    print('termina consulta')
+    print('Crear Objeto DjangoDash')
     app = DjangoDash('vd_oportunas',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.css.append_css({ "external_url" : "/static/assets/css/dashstyle.css" })
     app.layout = Container([
@@ -211,24 +222,21 @@ def dash_indicador_vd_oportunas():
         Store(id='data-table'),
         dcc.Download(id="descargar")
     ])
+    print('Se ejecutan los callbacks')
     @app.callback(               
-                #Output('select-eess','data'),
-                #Output('select-dispositivo','data'),
+
                 Output('select-as','data'),
                 Output('data-vd-completas','data'),
                 Output('data-values','data'),
-                #data-table'
-                
                 Output("notifications-update-data","children"),
                 Input('select-periodo','value'),
                 Input('select-eess','value'), 
                 Input('select-as','value'),         
     )
     def update_filters(periodo,eess,actor_social):#
+        print('Callback de filtrado de data')
         historico_carga_dff = completar_segun_periodo(dataframe = vd_carga_dff, dataframe_historico = historico_vd_df)
         historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = cvd_detalle_df, tipo = 'vd')
-        print("here")
-        print(historico_vd_dff)
         historicof_carga_dff = historico_carga_dff[historico_carga_dff['Mes_Periodo']==periodo]
         historicof_carga_dff= historicof_carga_dff[historicof_carga_dff['Rango_de_Edad']=='3 - 5 meses']
         historicof_vd_dff = historico_vd_dff[historico_vd_dff['Mes_VD']==periodo]
@@ -278,6 +286,7 @@ def dash_indicador_vd_oportunas():
                 Input('data-values','data'),       
     )
     def update_data(data_table,data):
+        print('Callback de ALL-GRAFICOS')
         table_num_vd_completas = pd.DataFrame(data_table)
         df = pd.DataFrame(data)
         print(table_num_vd_completas)
@@ -336,6 +345,7 @@ def dash_indicador_vd_oportunas():
             
             )
     def update_download(data,n_clicks_download):
+        print('Callback Descargar data')
         options=pd.DataFrame(data)
         #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
         if n_clicks_download:
@@ -343,16 +353,18 @@ def dash_indicador_vd_oportunas():
         
 
 def dash_indicador_vd_consecutivas():
+    print('DASHBOARD - VD CONSECUTIVAS')
+    print('Consulta de BG')
     #historico
     historico_vd_df=bq_historico_carga_vd()
-    print(historico_vd_df)
-    vd_carga_dff = bq_cvd_df()
-    print(vd_carga_dff)
+    #vd_carga_dff = bq_cvd_df()
     #
     cvd_detalle_df = bq_cvd_detalle_df()
-    cvd_reporte_df = bq_cvd_reporte_df() 
+   #cvd_reporte_df = bq_cvd_reporte_df() 
     
     periodos = periodos_list()
+    print('termina consulta')
+    print('Crear Objeto DjangoDash')
     app = DjangoDash('vd_consecutivas',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.css.append_css({ "external_url" : "/static/assets/css/dashstyle.css" })
     app.layout = Container([
@@ -418,6 +430,7 @@ def dash_indicador_vd_consecutivas():
         Store(id='data-table'),
         dcc.Download(id="descargar")
     ])
+    print('Se ejecutan los callbacks')
     @app.callback(               
                 #Output('select-eess','data'),
                 #Output('select-dispositivo','data'),
@@ -430,9 +443,10 @@ def dash_indicador_vd_consecutivas():
                 Input('select-as','value'),         
     )
     def update_filters(periodo,eess,actor_social):#
+        print('Callback de filtrado de data')
         #historico_carga_dff = completar_segun_periodo(dataframe = vd_carga_dff, dataframe_historico = historico_vd_df)
         historico_carga_dff = historico_vd_df[historico_vd_df['Rango_de_Edad']=='3 - 5 meses']
-        print(historico_carga_dff)
+        
         #historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = cvd_detalle_df, tipo = 'vd')
         historico_vd_dff=cvd_detalle_df[cvd_detalle_df['Rango_de_Edad']=='3 - 5 meses']
         if periodo == None:
@@ -490,10 +504,10 @@ def dash_indicador_vd_consecutivas():
                 Input('data-values','data'),       
     )
     def update_data(data_table,data):
+        print('Callback de ALL-GRAFICOS')
         table_num_vd_completas = pd.DataFrame(data_table)
         df = pd.DataFrame(data)
         #table_num_vd_completas[]
-        print(table_num_vd_completas)
         
         total_niños_evaluados = len(table_num_vd_completas['Numero_Doc_Nino'].unique())
         total_menores_dff = df.groupby(['Numero_Doc_Nino','Periodo_VD'])[['Estado_Intervencion_VD']].count().reset_index()
@@ -508,29 +522,14 @@ def dash_indicador_vd_consecutivas():
         pivot_vd_dff = numVD_validas_df.pivot_table(index=('Numero_Doc_Nino'),values=('VD_Valida'),columns='Periodo_VD').reset_index().fillna(0)
         dff_pivot = pivot_vd_dff.merge(numVD_df,how ='inner',on = ['Numero_Doc_Nino'])
         dff_pivot['Total_VD_REALIZADAS'] = (pivot_vd_dff[list(dff_pivot.columns[1:-1])].sum(axis=1))
-        
-        
         def comparador_n_vd(x,y):
             if x == y:
                 return 'Es VD Consecutiva'
             else:
                 return 'No es VD Consecutiva'
         dff_pivot['ESTADO_CONSECUTIVO'] = dff_pivot.apply(lambda x: comparador_n_vd(x['Numero_de_Visitas_Completas'], x['Total_VD_REALIZADAS']),axis=1)
-        print(dff_pivot)
         pie_dff_consecutivo = dff_pivot.groupby(['ESTADO_CONSECUTIVO'])[['Total_VD_REALIZADAS']].count().reset_index()
-        #dff_Data_=data_vd(dataframe = df, dataframe_carga = table_num_vd_completas)
-        #eess_estado_vd_dff=dff_Data_.groupby(['Estado_Visita','Establecimito_Salud_Meta'])[['Numero_visitas_validas']].sum().sort_values('Numero_visitas_validas').reset_index()
-        #estado_vd_dff=dff_Data_.groupby(['Estado_Visita'])[['Numero_visitas_validas']].sum().reset_index()
-        
-        
-        #etapa_dff = df.groupby(['Etapa_VD'])[['Actor_Social']].count().reset_index()
-        #etapa_dff = etapa_dff.rename(columns = {'Actor_Social':'Número de Visitas Realizadas'})
-        
-        #st_fecha_inter_df = df.groupby(['Estado_VD','Fecha_Intervencion'])[['Actor_Social']].count().reset_index()
-        #st_fecha_inter_df =st_fecha_inter_df.rename(columns = {'Actor_Social':'Número de Visitas Realizadas'})
-        print(df.columns)
         vd_df_eess_mes = df.groupby(['Establecimito_Salud_Meta','Mes_VD'])[['Numero_VD']].count().reset_index()
-        #'Establecimito_Salud_Meta'])[['Numero_de_Visitas_Completas']]
         eess_dff_visits=table_num_vd_completas.groupby(['Establecimito_Salud_Meta'])[['Numero_de_Visitas_Completas']].count().reset_index()
         return [
             total_niños_evaluados,
@@ -570,12 +569,15 @@ def dash_indicador_vd_consecutivas():
             
             )
     def update_download(data,n_clicks_download):
+        print('Callback Descargar data')
         options=pd.DataFrame(data)
         #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
         if n_clicks_download:
             return dcc.send_data_frame( options.to_excel, "vd_consecutivas.xlsx", sheet_name="Sheet_name_1",index =False)
 
 def dash_indicador_vd_georreferenciadas():
+    print('DASHBOARD - VD GEO')
+    print('Consulta de BG')
     #historico
     historico_vd_df=bq_historico_carga_vd()
     vd_carga_dff = bq_cvd_df()
@@ -584,6 +586,8 @@ def dash_indicador_vd_georreferenciadas():
     cvd_reporte_df = bq_cvd_reporte_df() 
     
     periodos = periodos_list()
+    print('termina consulta')
+    print('Crear Objeto DjangoDash')
     app = DjangoDash('vd_geo',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.css.append_css({ "external_url" : "/static/assets/css/dashstyle.css" })
     app.layout = Container([
@@ -637,6 +641,7 @@ def dash_indicador_vd_georreferenciadas():
         Store(id='data-table'),
         dcc.Download(id="descargar")
     ])
+    print('Se ejecutan los callbacks')
     @app.callback(               
                 #Output('select-eess','data'),
                 #Output('select-dispositivo','data'),
@@ -648,7 +653,8 @@ def dash_indicador_vd_georreferenciadas():
                 Input('select-eess','value'), 
                 Input('select-as','value'),         
     )
-    def update_filters(periodo,eess,actor_social):#
+    def update_filters(periodo,eess,actor_social):
+        print('Callback de filtrado de data')
         historico_carga_dff = completar_segun_periodo(dataframe = vd_carga_dff, dataframe_historico = historico_vd_df)
         historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = cvd_detalle_df, tipo = 'vd')
         if periodo == None:
@@ -701,6 +707,7 @@ def dash_indicador_vd_georreferenciadas():
                 Input('data-values','data'),       
     )
     def update_data(data_table,data):
+        print('Callback de ALL-GRAFICOS')
         table_num_vd_completas = pd.DataFrame(data_table)
         df = pd.DataFrame(data)
         print(df.columns)
@@ -757,6 +764,7 @@ def dash_indicador_vd_georreferenciadas():
             
             )
     def update_download(data,n_clicks_download):
+        print('Callback Descargar data')
         options=pd.DataFrame(data)
         #options['FECHA'] = options['FECHA'].apply(lambda a: pd.to_datetime(a).date())
         if n_clicks_download:
