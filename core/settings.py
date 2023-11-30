@@ -91,7 +91,12 @@ ASGI_APPLICATION='core.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+import dj_database_url
 
+DATABASES = {
+    'default': dj_database_url.parse('postgres://tesis_user:DSPAy55C7607KB5kfP9UIfCeOsjtName@dpg-clkbf058td7s73cegq30-a.oregon-postgres.render.com/vd_tesis')
+}
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -101,18 +106,10 @@ DATABASES = {
         'HOST': 'monorail.proxy.rlwy.net',
         'PORT':'31205'
     }
-    #'default': {
-    #    'ENGINE': 'django.db.backends.mysql',
-    #    'NAME':  'vd_tesis',
-    #    'USER':'root',
-    #    'PASSWORD':'3J;f]iJ6j=",P\^b',
-    #    'HOST': '34.171.252.185',
-    #    'PORT':'3306'
-    #}
-    
+
 
 }
-
+"""
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
