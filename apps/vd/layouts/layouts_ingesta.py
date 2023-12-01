@@ -311,8 +311,6 @@ def dash_ingestas():
                 Output('data-value','data'),
                 Input('upload-data-padron-1', 'contents'),
                 Input('upload-data-padron-2', 'contents'),
-                #Input('btn-guardar-data','n_clicks')
-                
                 )
     def update_pnominal(upload_1, upload_2):
         if upload_1 == None and upload_2 == None:
@@ -324,24 +322,19 @@ def dash_ingestas():
             primer_df = pd.read_excel(io.BytesIO(first_decoded),skiprows=4)
             df_1 = primer_df.copy()
             df_1 = clean_columns_padron(df_1)
-           
             return f"{df_1.shape[0]}",'',df_1.to_dict('series')
         
         elif upload_1 == None and upload_2 != None:
             content_string_2 = upload_2.split(',')[1]
             second_decoded = base64.b64decode(content_string_2)
             segundo_df = pd.read_excel(io.BytesIO(second_decoded),skiprows=4)
-            #df_2=clean_padron(segundo_df)
             df_2 = segundo_df.copy()
             df_2 = clean_columns_padron(df_2)
-            print('datos lado 2')
             return '',f"{df_2.shape[0]}",df_2.to_dict('series')
         
         elif upload_1 != None and upload_2 != None:
-            
             content_string_1 = upload_1.split(',')[1]
             content_string_2 = upload_2.split(',')[1]
-            
             first_decoded = base64.b64decode(content_string_1)
             second_decoded = base64.b64decode(content_string_2)
             primer_df = pd.read_excel(io.BytesIO(first_decoded),skiprows=4)
@@ -351,7 +344,6 @@ def dash_ingestas():
             df_2 = segundo_df.copy()
             df_2 = clean_columns_padron(df_2)
             dff = df_1._append(df_2,ignore_index= True)
-            
             return f"{df_1.shape[0]}",f"{df_2.shape[0]}",dff.to_dict('series')
     
     @app.callback(
@@ -363,18 +355,15 @@ def dash_ingestas():
         prevent_initial_call=True, 
     )
     def update_save_pn(n_clicks_guardar,data,opened):
-                import datetime
-                df = pd.DataFrame(data)
-                if n_clicks_guardar:
-                    
-                    df['Fecha_Carga'] = datetime.datetime.now()
-                    
-                    try:
-                        ingestaBq(dataframe = df, table = 'pnominal')
-                        
-                        return True, modal_child()
-                    except:
-                        return True, modal_child(estado='negativo')
+            import datetime
+            df = pd.DataFrame(data)
+            if n_clicks_guardar:
+                df['Fecha_Carga'] = datetime.datetime.now()
+                try:
+                    ingestaBq(dataframe = df, table = 'pnominal')
+                    return True, modal_child(href='/padron')
+                except:
+                    return True, modal_child(estado='negativo')
     
     @app.callback(
                 Output('text-data-upload-carga', 'value'),
@@ -384,7 +373,6 @@ def dash_ingestas():
     def update_c1(upload):
         if upload == None :
             return '',None
-        
         else:
             content_string_1 = upload.split(',')[1]
             first_decoded = base64.b64decode(content_string_1)
@@ -395,7 +383,6 @@ def dash_ingestas():
     @app.callback(
                 Output('modal-alerta-c1', 'opened'),
                 Output('modal-alerta-c1', 'children'),
-                
                 Input('btn-guardar-data-carga','n_clicks'),
                 State('data-c1-value','data'),
                 State('modal-alerta-c1', 'opened'),
@@ -405,17 +392,13 @@ def dash_ingestas():
                 import datetime
                 df = pd.DataFrame(data)
                 df['Celular_madre_C'] = df['Celular_madre_C'].astype('string')
-                print(df.columns)
                 if n_clicks_guardar:
-                        
-                        #df['Fecha_Carga'] = datetime.datetime.now()
-                        print(df)
-                        try:
-                            df['Fecha_Carga'] = datetime.datetime.now()
-                            cargarDataCargaVD(df)
-                            return True, modal_child()
-                        except:
-                            return True, modal_child(estado='negativo')
+                    try:
+                        df['Fecha_Carga'] = datetime.datetime.now()
+                        ingestaBq(dataframe = df, table = 'cvd')
+                        return True, modal_child()
+                    except:
+                        return True, modal_child(estado='negativo')
     
     @app.callback(
                 Output('text-data-vd', 'value'),
@@ -435,25 +418,21 @@ def dash_ingestas():
     @app.callback(
                 Output('modal-alerta-vdetalle', 'opened'),
                 Output('modal-alerta-vdetalle', 'children'),
-                
                 Input('btn-guardar-data-vd','n_clicks'),
                 State('data-vd-value','data'),
                 State('modal-alerta-vdetalle', 'opened'),
                 prevent_initial_call=True, 
                 )
     def update_save_c1(n_clicks_guardar,data,opened):
-                import datetime
-                df = pd.DataFrame(data)
-                
-                if n_clicks_guardar:
-                    
-                    df['Fecha_Carga'] = datetime.datetime.now()
-                    print(df)
-                    try:
-                        cargarDataVDetalle(df)
-                        return True, modal_child(href='/vd_detalle_resultados')
-                    except:
-                        return True, modal_child(estado='negativo')  
+        import datetime
+        df = pd.DataFrame(data)
+        if n_clicks_guardar:
+            df['Fecha_Carga'] = datetime.datetime.now()
+            #try:
+            ingestaBq(dataframe = df, table = 'cvd_detalle_reporte')
+            return True, modal_child(href='/vd_detalle_resultados')
+            #except:
+            #    return True, modal_child(estado='negativo')  
 
 CARGA_HISTORICO= Row([
                     Column([
@@ -627,7 +606,9 @@ def dash_ingesta_periodo():
                             lista_periodos = list(periodos_h['Mes_Periodo'])
                             var_condi = mes_periodo in lista_periodos
                             if var_condi == False and num_pinta >500:
-                                cargarHistoricoCarga(df = dff)
+                                #historial_vd_cargados
+                                ingestaBq(dataframe = dff, table = 'historial_vd_cargados')
+
                                 return True, modal_child()
                             else:
                                return True, modal_child(estado = 'existe')
@@ -677,7 +658,7 @@ def dash_ingesta_periodo():
                             lista_periodos = list(periodos_h['Mes_VD'])
                             var_condi = mes_periodo in lista_periodos
                             if var_condi == False and num_rows>1200:
-                                cargarHistoricoVD(df = dff)
+                                ingestaBq(dataframe = dff, table = 'cvd_detalle')
                                 return True, modal_child()
                             else:
                                return True, modal_child(estado = 'existe')
