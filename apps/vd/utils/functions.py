@@ -108,7 +108,10 @@ def calcular_total_vd(dataframe = None):
 def periodos_list():
     mes_num = int(str(datetime.datetime.now())[5:7])
     Mes=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic']
-    lista_end = Mes[6:-(12-mes_num)]
+    if mes_num == 12:
+        lista_end = Mes[6:]
+    else:
+        lista_end = Mes[6:-(12-mes_num)]
     return lista_end
 
 
@@ -116,8 +119,10 @@ def completar_segun_periodo(dataframe = None, dataframe_historico = None, tipo =
     lista_drop = ['Fecha_Carga','Periodo_VD'] if tipo =='carga'else ['Fecha_Carga'] 
     filtro_campo = 'Mes_Periodo' if tipo =='carga'else 'Mes_VD'
     mes_num = int(str(datetime.datetime.now())[5:7])
+    print(mes_num)
     Mes=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Set','Oct','Nov','Dic']
     mes_dict = dict(zip(range(1,13),Mes))
+    
     try:
         mes_text_now = mes_dict[mes_num]
         vd_dff_mes_now = dataframe[(dataframe[filtro_campo]==mes_text_now)]

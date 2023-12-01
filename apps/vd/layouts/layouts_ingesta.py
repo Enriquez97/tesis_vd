@@ -370,7 +370,8 @@ def dash_ingestas():
                     df['Fecha_Carga'] = datetime.datetime.now()
                     
                     try:
-                        cargarDataPadron(df,None)
+                        ingestaBq(dataframe = df, table = 'pnominal')
+                        
                         return True, modal_child()
                     except:
                         return True, modal_child(estado='negativo')

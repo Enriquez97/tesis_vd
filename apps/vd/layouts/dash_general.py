@@ -9,7 +9,6 @@ from apps.vd.utils.components import *
 from apps.vd.utils.cards import cardSection,cardGraph
 from apps.vd.utils.frames import Container,Div, Row ,Column, Store,Content,Download
 from apps.vd.data.lectura import *
-from apps.vd.data.ingesta import cargarDataVdReporte
 from apps.vd.utils.table import table_dag
 from apps.vd.utils.figures import bar_go_figure,pie_figure
 import datetime

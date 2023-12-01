@@ -214,32 +214,17 @@ def dash_padron_nominal():
     select_carga = bq_fcarga_pnominal_df()
     print('termina consulta')
     print('Crear Objeto DjangoDash')
-    select_ = select_carga['Fecha_Carga'].unique()
+    select_ = sorted(select_carga['Fecha_Carga'].unique())
     app = DjangoDash('padron-general',external_stylesheets=EXTERNAL_STYLESHEETS,external_scripts=EXTERNAL_SCRIPTS)
     app.layout = Container([
+        Row([Column([title(content='Padrón Nominal',order=1)],size=12)]),
         Row([
-            Column([title(content='Padrón Nominal',order=1)],size=12),
-            
-        ]),
-        Row([
-            
-            Column([
-                datepicker_(text = 'Rango Inicio', tipo = 'inicio')
-                  
-            ],size=2), 
-            Column([
-                datepicker_(text = 'Rango Fin', tipo = 'fin')
-            ],size=2), 
+            Column([datepicker_(text = 'Rango Inicio', tipo = 'inicio')],size=2), 
+            Column([datepicker_(text = 'Rango Fin', tipo = 'fin')],size=2), 
             Column([select(id='select-eess',texto='EESS de Atención',searchable=True)],size=3),
             Column([select(id='select-entidadUpdate',texto='Entidad Actualiza Registro',searchable=True)],size=2),
-            Column([
-                select(id='select-reporte-carga', data = select_,texto='Fecha de Carga de Fuente de Datos', value= select_[-1], clearable=False)
-            ],size=2),
-            Column([
-               btnDownload()
-            ],size=1)
-            
-        
+            Column([select(id='select-reporte-carga', data = select_,texto='Fecha de Carga de Fuente de Datos', value= select_[-1], clearable=False)],size=2),
+            Column([btnDownload()],size=1)
         ]),
         Row([
             Column([
@@ -247,7 +232,6 @@ def dash_padron_nominal():
                           data =[
                               {'label':'Fecha','value':'Fecha de Nacimiento'},
                               {'label':'Mes','value':'Mes'},
-                              #{'label':'Semana','value':'Semana'},
                               {'label':'Trimestre','value':'Trimestre'},
                               {'label':'Año','value':'Año'},
                         ]
@@ -256,18 +240,15 @@ def dash_padron_nominal():
             ],size=6),
             Column([
                 segmented(id='segmented-pie',value = 'Entidad Actualiza',
-                          data =[
-                              
+                        data =[
                               {'label':'Entidad Actualiza','value':'Entidad Actualiza'},
                               {'label':'Frecuencia de Atención','value':'Frecuencia de Atención'},
                               {'label':'Estado Encontrado','value':'Estado Encontrado'},
                               {'label':'Tipo de Documento','value':'Tipo de Documento'},
                               {'label':'Tipo Documento Madre','value':'Tipo de Documento - Madre'},
-                              #{'label':'Sexo','value':'Sexo'},
                         ]
                 ),
                 loadingOverlay(cardGraph(id_graph = 'pie',height=350))
-            
             ],size=6),
         ]),
         Row([
@@ -277,7 +258,6 @@ def dash_padron_nominal():
                               {'label':'EESS de Nacimiento','value':'Establecimiento de Salud de Nacimiento'},
                               {'label':'EESS de Atención','value':'Establecimiento de Salud de Atención'},
                               {'label':'EESS de Adscripción','value':'Establecimiento de Salud de Adscripción'},
-                              
                         ]
                 ),
                 loadingOverlay(cardGraph(id_graph = 'bar-eess',height=400))
@@ -293,9 +273,7 @@ def dash_padron_nominal():
             Column([
                 loadingOverlay(cardGraph(id_graph = 'pie-ref',height=435))
             
-            ],size=3),
-        
-        
+            ],size=3),    
         ]),
         Div(id='notifications-update-data'),
         Store(id='data-values'),
@@ -304,15 +282,15 @@ def dash_padron_nominal():
     print('Se ejecutan los callbacks')
     
     @app.callback(
-                    Output('select-eess','data'),
-                    Output('select-entidadUpdate','data'),
-                    Output("data-values","data"),
-                    Output("notifications-update-data","children"),
-                    Input('select-reporte-carga','value'),
-                    Input('datepicker-inicio','value'),
-                    Input('datepicker-fin','value'),
-                    Input('select-eess','value'),
-                    Input('select-entidadUpdate','value'),
+        Output('select-eess','data'),
+        Output('select-entidadUpdate','data'),
+        Output("data-values","data"),
+        Output("notifications-update-data","children"),
+        Input('select-reporte-carga','value'),
+        Input('datepicker-inicio','value'),
+        Input('datepicker-fin','value'),
+        Input('select-eess','value'),
+        Input('select-entidadUpdate','value'),
     )
     def update_filtro_data(*args):
         print('Callback de filtrado de data')
@@ -322,9 +300,7 @@ def dash_padron_nominal():
         if validar_all_none(variables = (args[3:])) == True:
             dfff=dff.copy()
         else:
-            dfff=dff.query(dataframe_filtro(values=list(args[3:]),columns_df=['Establecimiento de Salud de Atención','Entidad Actualiza']))
-        
-        #anio=[{'label': i, 'value': i} for i in df['Año'].unique()]
+            dfff=dff.query(dataframe_filtro(values=list(args[3:]),columns_df=['Establecimiento de Salud de Atención','Entidad Actualiza']))        
         return [
             [{'label': i, 'value': i} for i in dfff['Establecimiento de Salud de Atención'].unique()],
             [{'label': i, 'value': i} for i in dfff['Entidad Actualiza'].unique()],
@@ -333,10 +309,9 @@ def dash_padron_nominal():
         ]
     
     @app.callback(
-                    Output('line-st','figure'),
-                    Input("data-values","data"),
-                    Input("segmented-st","value"),
-                    
+        Output('line-st','figure'),
+        Input("data-values","data"),
+        Input("segmented-st","value"),            
     )
     def update_graph_linea(data,segmented):
        print('Callback de Segmented-Linechart')
@@ -351,23 +326,19 @@ def dash_padron_nominal():
                           height = 350, 
                           x_title = 'Fecha',
                           y_title = 'Número de Niños Nacidos',
-                          title=' N° de Niños Nacidos'
-                          
+                          title=' N° de Niños Nacidos'          
         )
     
     @app.callback(
-                    Output('pie','figure'),
-                    Input("data-values","data"),
-                    Input("segmented-pie","value"),
-                    
+        Output('pie','figure'),
+        Input("data-values","data"),
+        Input("segmented-pie","value"),             
     )
     def update_graph_pie(data,segmented):
        print('Callback de Segmented-Piechart')
        df = pd.DataFrame(data) 
        df[segmented]=df[segmented].fillna('Sin Registro')
-       
        dff=df.groupby([segmented])[['Fecha de Nacimiento']].count().reset_index()
-      
        return pie_figure(df = dff, 
                          label_col= segmented, 
                          value_col = 'Fecha de Nacimiento',
@@ -375,14 +346,14 @@ def dash_padron_nominal():
                          height=350,
                          textposition = 'inside',
                          textfont_size=13,
-                         list_or_color=['#71dbd2','#eeffdb','#ade4b5','#d0eaa3','#fff18c'])
+                         list_or_color=['#71dbd2','#eeffdb','#ade4b5','#d0eaa3','#fff18c']
+        )
        
     
     @app.callback(
-                    Output('bar-eess','figure'),
-                    Input("data-values","data"),
-                    Input("segmented-eess","value"),
-                    
+        Output('bar-eess','figure'),
+        Input("data-values","data"),
+        Input("segmented-eess","value"),         
     )
     def update_graph_bar(data,segmented):
         print('Callback de Segmented-Barchart')
@@ -390,17 +361,17 @@ def dash_padron_nominal():
         df[segmented]=df[segmented].fillna('Sin Registro')
         dff=df.groupby([segmented])[['Tipo de Documento']].count().sort_values('Tipo de Documento').reset_index()
         dff = dff[dff['Tipo de Documento']>3]
+        dff = dff.rename(columns = {'Tipo de Documento':'N° de Niños'})
         return bar_go_figure(df = dff, 
-                             x = 'Tipo de Documento',
+                             x = 'N° de Niños',
                              y = segmented,
                              orientation='h',
                              height = 400, 
                              title = segmented,
-                             text='Tipo de Documento',
+                             text='N° de Niños',
                              xaxis_title='N° de Niños',
                              yaxis_title='Establecimiento de Salud',
-                             list_colors=LISTA_COLORES_BAR
-                             
+                             list_colors=LISTA_COLORES_BAR        
         )
     
     @app.callback(

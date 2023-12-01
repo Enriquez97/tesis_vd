@@ -14,7 +14,7 @@ import dash_ag_grid as dag
 from apps.vd.constans import COLUMNAS_COMPROMISO_1,EESS_TRUJILLO
 from apps.vd.data.transformacion import clean_compromiso1_data,clean_columns_c1
 import datetime
-from apps.vd.data.ingesta import cargarDataCargaVD
+
 from apps.vd.data.lectura import *
 import plotly.express as px
 from ..utils.functions import completar_segun_periodo,table_periodos

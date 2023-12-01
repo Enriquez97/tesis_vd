@@ -43,7 +43,7 @@ def dash_indicador_resultados():
                 select(id='select-dispositivo',texto='Dispositivo de Intervención',data=vd_detalle_df['Dispositivo Intervención'].unique())
             ],size=3),
             Column([
-                select(id='select-reporte-carga', data = dff['Fecha_Carga'].unique(),texto='Fecha de Carga de Fuente de Datos', value= dff['Fecha_Carga'].unique()[-1], clearable=False)
+                select(id='select-reporte-carga', data = sorted(dff['Fecha_Carga'].unique()),texto='Fecha de Carga de Fuente de Datos', value= dff['Fecha_Carga'].unique()[0], clearable=False)
             ],size=3)
             
         ]), 
@@ -179,7 +179,7 @@ def dash_indicador_vd_oportunas():
                 select(id='select-as',texto='Actor Social')
             ],size=4),
             Column([
-                select(id='select-periodo',texto='Periodo',data=periodos,value = periodos[-2],clearable=False )
+                select(id='select-periodo',texto='Periodo',data=periodos,value = periodos[-2],clearable=False )#value = periodos[-1]
             ],size=2)
             
         ]),
@@ -236,14 +236,21 @@ def dash_indicador_vd_oportunas():
     def update_filters(periodo,eess,actor_social):#
         print('Callback de filtrado de data')
         historico_carga_dff = completar_segun_periodo(dataframe = vd_carga_dff, dataframe_historico = historico_vd_df)
+        
         historico_vd_dff = completar_segun_periodo(dataframe = cvd_reporte_df, dataframe_historico = cvd_detalle_df, tipo = 'vd')
+        
         historicof_carga_dff = historico_carga_dff[historico_carga_dff['Mes_Periodo']==periodo]
+        
         historicof_carga_dff= historicof_carga_dff[historicof_carga_dff['Rango_de_Edad']=='3 - 5 meses']
+        
         historicof_vd_dff = historico_vd_dff[historico_vd_dff['Mes_VD']==periodo]
+        
         historicof_vd_dff = historicof_vd_dff[historicof_vd_dff['Rango_de_Edad']=='3 - 5 meses']
         
         vd_det_as_df=historicof_vd_dff.groupby(['Numero_Doc_Nino','Actor_Social'])[['Rango_de_Edad']].count().reset_index()
+        
         table_num_vd_completas = historicof_carga_dff.groupby(['Numero_Doc_Nino','Establecimito_Salud_Meta'])[['Numero_de_Visitas_Completas']].sum().reset_index()
+        
         table_num_vd_completas = table_num_vd_completas.merge(vd_det_as_df,how ='left', on = 'Numero_Doc_Nino').fillna('No Especificado')
         #vd_df = vd_detalle_df[vd_detalle_df['Fecha_Carga']==carga]
         if (eess == None or len(eess) == 0) and actor_social == None:
@@ -258,6 +265,7 @@ def dash_indicador_vd_oportunas():
         elif eess != None and actor_social != None:
             filt_df = historicof_vd_dff[(historicof_vd_dff['Establecimito_Salud_Meta'].isin(eess))&(historicof_vd_dff['Actor_Social']==actor_social)]
             filt_table = table_num_vd_completas[(table_num_vd_completas['Establecimito_Salud_Meta'].isin(eess))&(table_num_vd_completas['Actor_Social']==actor_social)]
+        print(filt_df)
         return [
             [{'label': i, 'value': i} for i in filt_df['Actor_Social'].unique()],
             filt_table.to_dict('series'),

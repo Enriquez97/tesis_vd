@@ -77,6 +77,7 @@ def clean_columns_padron(dataframe = pd.DataFrame()):
     })
     dff['Doc_num_jefefamilia_padron']=dff['Doc_num_jefefamilia_padron'].astype('string')
     return dff
+
 def transform_padron(dff = pd.DataFrame()):
     dff[['CNV', 'CUI', 'DNI']]=dff[['CNV', 'CUI', 'DNI']].fillna(0)#.astype('int')
     dff[['CNV', 'CUI', 'DNI']]=dff[['CNV', 'CUI', 'DNI']].astype('int')
