@@ -428,11 +428,11 @@ def dash_ingestas():
         df = pd.DataFrame(data)
         if n_clicks_guardar:
             df['Fecha_Carga'] = datetime.datetime.now()
-            #try:
-            ingestaBq(dataframe = df, table = 'cvd_detalle_reporte')
-            return True, modal_child(href='/vd_detalle_resultados')
-            #except:
-            #    return True, modal_child(estado='negativo')  
+            try:
+                ingestaBq(dataframe = df, table = 'cvd_detalle_reporte')
+                return True, modal_child(href='/vd_detalle_resultados')
+            except:
+                return True, modal_child(estado='negativo')  
 
 CARGA_HISTORICO= Row([
                     Column([
@@ -599,22 +599,25 @@ def dash_ingesta_periodo():
             
                 dff = pd.DataFrame(data)
                 num_pinta = dff[dff['Pinta']==True]['Pinta'].count()
+                print(dff)
                 if n_clicks_guardar:
-                        try:
+                        #try:
                             mes_periodo = dff['Mes_Periodo'].unique()[0]
                             periodos_h =bq_periodos_historico_carga()
+                            print(periodos_h)
                             lista_periodos = list(periodos_h['Mes_Periodo'])
+                            print(lista_periodos)
                             var_condi = mes_periodo in lista_periodos
                             if var_condi == False and num_pinta >500:
                                 #historial_vd_cargados
                                 ingestaBq(dataframe = dff, table = 'historial_vd_cargados')
 
                                 return True, modal_child()
-                            else:
-                               return True, modal_child(estado = 'existe')
+                            #else:
+                            #   return True, modal_child(estado = 'existe')
                                 
-                        except:
-                            return True, modal_child(estado='negativo')
+                        #except:
+                        #    return True, modal_child(estado='negativo')
     
     @app.callback(
                 Output('text-data-hvd', 'value'),
@@ -650,18 +653,20 @@ def dash_ingesta_periodo():
                 
                 
                 num_rows=dff['Mes_VD'].count()
+                num_rows = int(num_rows)
                 if n_clicks_guardar:
-                        try:
+                        #try:
                             mes_periodo = dff['Mes_VD'].unique()[0]
                             
                             periodos_h =bq_periodos_historico_vd()
+                            
                             lista_periodos = list(periodos_h['Mes_VD'])
                             var_condi = mes_periodo in lista_periodos
                             if var_condi == False and num_rows>1200:
                                 ingestaBq(dataframe = dff, table = 'cvd_detalle')
                                 return True, modal_child()
-                            else:
-                               return True, modal_child(estado = 'existe')
+                            #else:
+                            #   return True, modal_child(estado = 'existe')
                                 
-                        except:
-                            return True, modal_child(estado='negativo')
+                        #except:
+                        #    return True, modal_child(estado='negativo')

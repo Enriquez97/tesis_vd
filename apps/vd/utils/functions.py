@@ -245,26 +245,26 @@ def table_periodos(dataframe_all_data = None, dataframe_detalle_vd = None):
                 'Total VD Presencial por MOVIL' : total_vd_presencial_validas_movil,
                 'No Encontrados' : total_no_encontrados,
                 'Rechazados' : total_rechazados,
-                '% VD Efectivas':porcentaje_vd_efectivas,
-                '% VD Georreferencia':porcentaje_vd_movil
+                '%_VD_Efectivas':porcentaje_vd_efectivas,
+                '%_VD_Georreferencia':porcentaje_vd_movil
             }
             dff = pd.DataFrame(dict_table)
-        value_total_efectivas_vd = dff['% VD Efectivas'].sum()
-        value_promedio_efectivas_vd = round(dff['% VD Efectivas'].mean(),1)
+        value_total_efectivas_vd = dff['%_VD_Efectivas'].sum()
+        value_promedio_efectivas_vd = round(dff['%_VD_Efectivas'].mean(),1)
             
-        value_total_geo_vd = dff['% VD Georreferencia'].sum()
+        value_total_geo_vd = dff['%_VD_Georreferencia'].sum()
             
         
         dff.loc['TOTAL',:]= dff.sum(numeric_only=True, axis=0)  
         dff=dff.fillna('TOTAL')
-        dff['% VD Efectivas']=dff['% VD Efectivas'].replace({value_total_efectivas_vd: value_promedio_efectivas_vd})
+        dff['%_VD_Efectivas']=dff['%_VD_Efectivas'].replace({value_total_efectivas_vd: value_promedio_efectivas_vd})
             
         #
         
         
         
         value_geo_vd = round((dff['Total VD Presencial por MOVIL'].unique()[-1]/dff['Total VD Presencial'].unique()[-1])*100,1)    
-        dff['% VD Georreferencia']=dff['% VD Georreferencia'].replace({value_total_geo_vd: value_geo_vd})
+        dff['%_VD_Georreferencia']=dff['%_VD_Georreferencia'].replace({value_total_geo_vd: value_geo_vd})
         return dff
 
 def mes_num(x):

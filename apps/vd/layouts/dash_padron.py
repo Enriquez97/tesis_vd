@@ -13,7 +13,7 @@ from apps.vd.utils.frames import Container,Div, Row ,Column, Store
 #from apps.vd.utils.data import padron_df_dash, padron_anio_list
 from apps.vd.utils.functions import dataframe_filtro, validar_all_none
 from apps.vd.utils.cards import cardGraph
-from apps.vd.utils.figures import line_figure,pie_figure, bar_go_figure
+from apps.vd.utils.figures import line_figure,pie_figure, bar_go_figure, indicador_figure
 import dash_ag_grid as dag
 from datetime import datetime, date, timedelta
 from ...vd.data.lectura import *
@@ -223,7 +223,7 @@ def dash_padron_nominal():
             Column([datepicker_(text = 'Rango Fin', tipo = 'fin')],size=2), 
             Column([select(id='select-eess',texto='EESS de Atención',searchable=True)],size=3),
             Column([select(id='select-entidadUpdate',texto='Entidad Actualiza Registro',searchable=True)],size=2),
-            Column([select(id='select-reporte-carga', data = select_,texto='Fecha de Carga de Fuente de Datos', value= select_[-1], clearable=False)],size=2),
+            Column([select(id='select-reporte-carga', data = select_,texto='Fecha de Carga', value= select_[-1], clearable=False)],size=2),
             Column([btnDownload()],size=1)
         ]),
         Row([
@@ -237,7 +237,7 @@ def dash_padron_nominal():
                         ]
                 ),
                 loadingOverlay(cardGraph(id_graph = 'line-st',height=350))
-            ],size=6),
+            ],size=5),
             Column([
                 segmented(id='segmented-pie',value = 'Entidad Actualiza',
                         data =[
@@ -249,7 +249,11 @@ def dash_padron_nominal():
                         ]
                 ),
                 loadingOverlay(cardGraph(id_graph = 'pie',height=350))
-            ],size=6),
+            ],size=4),
+            Column([
+                
+                loadingOverlay(cardGraph(id_graph = 'indicador',height=380))
+            ],size=3),
         ]),
         Row([
             Column([
@@ -261,7 +265,7 @@ def dash_padron_nominal():
                         ]
                 ),
                 loadingOverlay(cardGraph(id_graph = 'bar-eess',height=400))
-            ],size=4),
+            ],size=6),
             Column([
                 loadingOverlay(cardGraph(id_graph = 'pie-estado-registro',height=435))
             
@@ -269,11 +273,11 @@ def dash_padron_nominal():
             Column([
                 loadingOverlay(cardGraph(id_graph = 'pie-ejevial',height=435))
             
-            ],size=3),
+            ],size=2),
             Column([
                 loadingOverlay(cardGraph(id_graph = 'pie-ref',height=435))
             
-            ],size=3),    
+            ],size=2),    
         ]),
         Div(id='notifications-update-data'),
         Store(id='data-values'),
@@ -378,6 +382,7 @@ def dash_padron_nominal():
                     Output('pie-estado-registro','figure'),
                     Output('pie-ejevial','figure'),
                     Output('pie-ref','figure'),
+                    Output('indicador','figure'),
                     Input("data-values","data"),             
     )
     def update_graph_pie_2(data):
@@ -386,7 +391,12 @@ def dash_padron_nominal():
         estado_reg_df=df.groupby(['Estado de Registro'])[['Tipo de Documento']].count().reset_index() 
         estado_eje_df=df.groupby(['Estado Eje Vial'])[['Tipo de Documento']].count().reset_index() 
         estado_ref_df=df.groupby(['Estado Referencias'])[['Tipo de Documento']].count().reset_index()
-         
+        
+        #"Entidad Actualiza"
+        total = df['Entidad Actualiza'].count()
+        actualizados = df[df['Entidad Actualiza']=='MUNICIPIO']['Entidad Actualiza'].count()
+        valor_completado = (100- round((actualizados/total)*100,1))+100
+        print(valor_completado)
         return[
             pie_figure(df = estado_reg_df, 
                          label_col= 'Estado de Registro', 
@@ -403,7 +413,8 @@ def dash_padron_nominal():
                          title = 'Estado Eje Vial',
                          height=435,
                          list_or_color = ['#079ea6','#19274e'],
-                         textfont_size=15
+                         textfont_size=15,
+                         showlegend=False
                         ),
             pie_figure(df = estado_ref_df, 
                          label_col= 'Estado Referencias', 
@@ -411,8 +422,10 @@ def dash_padron_nominal():
                          title = 'Estado Referencias',
                          height=435,
                          list_or_color = ['#a85163','#b4dec1'],
-                         textfont_size=15
+                         textfont_size=15,
+                         showlegend=False
                          ),
+            indicador_figure(value=100,delta_reference=valor_completado, title= "Meta de Actualizaciones")
         ]
     
     @app.callback(

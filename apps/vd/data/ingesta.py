@@ -8,6 +8,7 @@ def ingestaBq(dataframe = None, table = ''):
         destination_table = f'dataset_tesis.{table}',
         project_id='ew-tesis',
         if_exists = 'append',
-        credentials = bq_cred,             
+        credentials = bq_cred,    
+        table_schema ={}         
     )
 

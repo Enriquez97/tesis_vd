@@ -249,6 +249,23 @@ def table_dag(df = pd.DataFrame):
                         columnSize="sizeToFit",
                         style={"height": None}
                     )])
+    
+    
+columnDefs = [
+    {
+        
+        "cellStyle": {
+            "styleConditions": [
+                
+                {
+                    "condition": "params.data.%_VD_Efectivas >= 80",
+                    "style": {"backgroundColor": "lightcoral"},
+                },
+            ],
+            "defaultStyle": {"backgroundColor": "mediumaquamarine"},
+        }},
+   
+]    
 
 def dashboard_indicadores_vd():
     print('DASHBOARD - VD GEO')
@@ -296,6 +313,7 @@ def dashboard_indicadores_vd():
                         rowClassRules={"bg-primary fw-bold": "['TOTAL'].includes(params.data.Periodo)"},
                         className="ag-theme-alpine headers1",
                         dashGridOptions = {"domLayout": "autoHeight"},
+                        
                         #getRowId="params.data.State",
                         columnSize="sizeToFit",
                         style={"height": None}
@@ -359,24 +377,27 @@ def dashboard_indicadores_vd():
         resultados_dff = resultados_df[resultados_df['Periodo']!='TOTAL']
         resultados_dff['mes'] = resultados_dff['Periodo'].str[5:]
         resultados_dff['mes_num'] = resultados_dff.apply(lambda x: mes_num(x['mes']),axis=1)
-        
+        #columnsdefs
+        columns_=[{"field": i,"cellStyle": {'font-size': 18}} for i in resultados_df.columns]#,"cellStyle": {'font-size': 18,}
+        concat_cols = columns_ #+[{"cellStyle": {'font-size': 18,"styleConditions": [{"condition": "params.data.%_VD_Efectivas >= 80","style":{"backgroundColor": "lightcoral"}}]}}]
         #asignados
         asignados_df = resultados_dff.groupby(['Periodo','mes_num'])[['Total de Niños Asignados']].sum().sort_values('mes_num').reset_index()
         vd_presencial_df = resultados_dff.groupby(['Periodo','mes_num'])[['Total VD Presencial Válidas']].sum().sort_values('mes_num').reset_index()
         vd_movil_df = resultados_dff.groupby(['Periodo','mes_num'])[['Total VD Presencial por MOVIL']].sum().sort_values('mes_num').reset_index()
         noencontrados_df = resultados_dff.groupby(['Periodo','mes_num'])[['No Encontrados']].sum().sort_values('mes_num').reset_index()
-        porcentaje_vd_efectivas_df = resultados_dff.groupby(['Periodo','mes_num'])[['% VD Efectivas']].sum().sort_values('mes_num').reset_index()
-        porcentaje_vd_geo_df = resultados_dff.groupby(['Periodo','mes_num'])[['% VD Georreferencia']].sum().sort_values('mes_num').reset_index()
+        porcentaje_vd_efectivas_df = resultados_dff.groupby(['Periodo','mes_num'])[['%_VD_Efectivas']].sum().sort_values('mes_num').reset_index()
+        porcentaje_vd_geo_df = resultados_dff.groupby(['Periodo','mes_num'])[['%_VD_Georreferencia']].sum().sort_values('mes_num').reset_index()
         #resultados_df.to_excel('resultados_c1.xlsx')
+        
         return [
                 resultados_df.to_dict("records"),
-                [{"field": i,"cellStyle": {'font-size': 18}} for i in resultados_df.columns],
+                concat_cols,
                 figure_bar_px(df = asignados_df ,x='Periodo', y = 'Total de Niños Asignados', color = None, titulo = 'Niños Asignados por Periodo',showticklabels_x=True,bottom=20,top=60,height=350, color_list =['#007bff']),
                 figure_bar_px(df = vd_presencial_df ,x='Periodo', y = 'Total VD Presencial Válidas', color = None, titulo = 'VD Presenciales Válidas por Periodo',showticklabels_x=True,bottom=20,top=60,height=350, color_list =['#007bff']),
                 figure_bar_px(df = vd_movil_df ,x='Periodo', y = 'Total VD Presencial por MOVIL', color = None, titulo = 'VD Presenciales Movil - Periodo',showticklabels_x=True,bottom=20,top=60,height=350, color_list =['#007bff']),
                 figure_bar_px(df = noencontrados_df ,x='Periodo', y = 'No Encontrados', color = None, titulo = 'Niños No Encontrados por Periodo',showticklabels_x=True,bottom=20,top=60,height=350, color_list =['#007bff']),
-                figure_bar_px(df = porcentaje_vd_efectivas_df ,x='Periodo', y = '% VD Efectivas', color = None, titulo = '% VD Efectivas por Periodo',showticklabels_x=True,bottom=20,top=60,height=350, color_list =['#007bff']),
-                figure_bar_px(df = porcentaje_vd_geo_df ,x='Periodo', y = '% VD Georreferencia', color = None, titulo = '% VD Georreferencia por Periodo',showticklabels_x=True,bottom=20,top=60,height=350, color_list =['#007bff']),
+                figure_bar_px(df = porcentaje_vd_efectivas_df ,x='Periodo', y = '%_VD_Efectivas', color = None, titulo = '% VD Efectivas por Periodo',showticklabels_x=True,bottom=20,top=60,height=350, color_list =['#007bff']),
+                figure_bar_px(df = porcentaje_vd_geo_df ,x='Periodo', y = '%_VD_Georreferencia', color = None, titulo = '% VD Georreferencia por Periodo',showticklabels_x=True,bottom=20,top=60,height=350, color_list =['#007bff']),
                 resultados_df.to_dict('series')
         ]
     

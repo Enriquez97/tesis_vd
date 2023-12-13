@@ -194,9 +194,9 @@ def figure_bar_px(titulo = '',x_titulo = '',y_titulo = '',l_titulo = '', df = No
               legend_title_text = l_titulo,
               legend=dict(font=dict(size=14,color="black"))
           )
-  fig.update_xaxes(tickfont=dict(size=14),color='black',showticklabels = showticklabels_x,title_font_family="sans-serif",title_font_size = 13,automargin=True)#,showgrid=True, gridwidth=1, gridcolor='black',
-  fig.update_yaxes(tickfont=dict(size=14),color='black',showticklabels = showticklabels_y,title_font_family="sans-serif",title_font_size = 13,automargin=True)  
-  fig.update_traces(hovertemplate ='<br>'+x+': <b>%{x}</b><br>'+y+': <b>%{y}</b>',hoverlabel=dict(font_size=15,bgcolor="white"))
+  fig.update_xaxes(tickfont=dict(size=12),color='black',showticklabels = showticklabels_x,title_font_family="sans-serif",title_font_size = 13,automargin=True)#,showgrid=True, gridwidth=1, gridcolor='black',
+  fig.update_yaxes(tickfont=dict(size=12),color='black',showticklabels = showticklabels_y,title_font_family="sans-serif",title_font_size = 13,automargin=True)  
+  fig.update_traces(hovertemplate ='<br>'+x+': <b>%{x}</b><br>'+y+': <b>%{y}</b>',hoverlabel=dict(font_size=14,bgcolor="white"))
   #fig.update_layout(paper_bgcolor='#f7f7f7',plot_bgcolor='#f7f7f7')
   #,type='category'
   return fig#.show()
@@ -254,3 +254,41 @@ def gauge_figure( value = 0, maximo_value = 100, titulo = '',height = 300):
 
   fig.update_layout(paper_bgcolor = "white", font = {'color': "black", 'family': "sans-serif",'size': 20},height = height)
   return fig
+
+
+def indicador_figure(value = 100, delta_reference = 320, title = ''
+             
+    ):
+    fig = go.Figure(go.Indicator(
+                        mode = "number+delta",
+                        value = value,
+                        number = {'suffix': "%"}, 
+                        delta = {'position': "bottom", 'reference': delta_reference},
+                        title = {"text": f"<b>{title}</b>",'font': {'size': 23}},
+                        
+                    ))
+
+    fig.update_layout(paper_bgcolor = "lightgray")
+    
+    return fig
+
+def indicador_vd_figure(value = 100, delta_reference = 320, title = '', height = 300, percent = 10
+             
+    ):
+    fig = go.Figure(go.Indicator(
+                        mode = "number+delta",
+                        value = value,
+                        domain = {'x': [0, 1], 'y': [0, 1]},
+                        number = {'valueformat':'.0f'},
+                       # number = {'suffix': "%"}, 
+                        delta = {'relative':False, 'reference': delta_reference, "valueformat": ".0f"},
+                        title = {"text": f"<b>{title}</b>",'font': {'size': 23}},
+                        
+                    ))
+
+    #fig.update_layout(paper_bgcolor = "lightgray")
+    fig.update_layout(height = height)
+    fig.add_annotation(x=0.5, y=-0.2, text=f"{percent}%", font=dict(color="black",size = 25), showarrow=False)
+    #fig.add_annotation(x=0.5, y=0.4, text="30%", font=dict(color="green"), showarrow=False)
+    
+    return fig

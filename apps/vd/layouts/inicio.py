@@ -22,71 +22,31 @@ def dash_home():
     app.layout = Container([
     Row([
         Column([
-            card_index(
-                    img = imagen_ingesta_h,
-                    title_card= "Ingesta de Datos Historicos",
-                    url = '/ingesta-historico',
-                    tipo='Ingesta'
-            )
+            card_index(img = imagen_ingesta_h,title_card= "Ingesta de Datos Historicos",url = '/ingesta-historico',tipo='Ingesta')
         ], size=3),
-        
+
         Column([
-            card_index(
-                    img = image_ingesta,
-                    title_card= "Ingesta de Datos",
-                    url = '/ingesta-any',
-                    tipo='Ingesta'
-            )
+            card_index(img = image_ingesta,title_card= "Ingesta de Datos",url = '/ingesta-any',tipo='Ingesta')
         ], size=3),
         Column([
-            card_index(
-                img = image_vd,
-                title_card= "Visitas Domiciliarias Ejecutadas",
-                url = '/vd_detalle_resultados',
-                tipo='Dashboard'
-            )
+            card_index(img = image_vd,title_card= "Visitas Domiciliarias Ejecutadas",url = '/vd_detalle_resultados',tipo='Dashboard')
         ], size=3),
         Column([
-            card_index(
-                img = imagen_padron,
-                title_card= "Padrón Nominal",
-                url = '/padron',
-                tipo='Dashboard'
-            )
+            card_index(img = imagen_padron,title_card= "Padrón Nominal",url = '/padron',tipo='Dashboard')
         ], size=3),
     ]),
     Row([
         Column([
-            card_index(
-                img = image_svdo,
-                title_card= "Visitas Oportunas",
-                url = '/vd-oportunas',
-                tipo='Dashboard'
-            )
+            card_index(img = image_svdo,title_card= "Visitas Oportunas",url = '/vd-oportunas',tipo='Dashboard')
         ], size=3),
         Column([
-            card_index(
-                img = image_svdc,
-                title_card= "Visitas Consecutivas", 
-                url = '/vd-consecutivas',
-                tipo='Dashboard'
-            )
+            card_index(img = image_svdc,title_card= "Visitas Consecutivas", url = '/vd-consecutivas',tipo='Dashboard')
         ], size=3),
         Column([
-            card_index(
-                img = image_svdg,
-                title_card= "Visitas Georreferenciadas", 
-                url = '/vd-georreferenciadas',
-                tipo='Dashboard'
-            )
+            card_index(img = image_svdg,title_card= "Visitas Georreferenciadas", url = '/vd-georreferenciadas',tipo='Dashboard')
         ], size=3),
         Column([
-            card_index(
-                img = imagen_rvd,
-                title_card= "Visitas - Resultados", 
-                url= '/dashboard-seguimiento',
-                tipo='Dashboard'
-            )
+            card_index(img = imagen_rvd,title_card= "Visitas - Resultados", url= '/dashboard-seguimiento',tipo='Dashboard')
         ], size=3),
     ]),
     

@@ -13,8 +13,8 @@ def bq_pnominal_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.pnominal`"):
 
 # DATA UNICA DEL ULTIMO MES DE CARGA VD
 def bq_cvd_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd` WHERE Rango_de_Edad !='Otros menores a 12 meses'"):
-    query_data_cvd = query#
-    cvd_bq_df = pd.read_gbq(   query = query_data_cvd ,
+    
+    cvd_bq_df = pd.read_gbq(   query = query ,
                                     project_id = 'ew-tesis',
                                     credentials = bq_cred,
                                     dialect = 'standard')
@@ -26,8 +26,8 @@ def bq_cvd_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd` WHERE Rango_de
 
 #historico de visitas domiciarias completadas durante el mes
 def bq_cvd_detalle_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd_detalle` WHERE Rango_de_Edad !='Otros menores a 12 meses'"):
-    query_data_cvd_detalle = query
-    cvd_detalle_bq_df = pd.read_gbq(   query = query_data_cvd_detalle ,
+    
+    cvd_detalle_bq_df = pd.read_gbq(   query = query ,
                                     project_id = 'ew-tesis',
                                     credentials = bq_cred,
                                     dialect = 'standard')
@@ -45,9 +45,9 @@ def bq_reporte_vd_df():#!='Otros menores a 12 meses'
    
     return reporte_bd_bq_df
 
-def bq_cvd_reporte_df():
-    query_data_cvd = "SELECT * FROM `ew-tesis.dataset_tesis.cvd_detalle_reporte` WHERE Rango_de_Edad !='Otros menores a 12 meses'"
-    cvd_reporte_bq_df = pd.read_gbq(   query = query_data_cvd ,
+def bq_cvd_reporte_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd_detalle_reporte` WHERE Rango_de_Edad !='Otros menores a 12 meses'"):
+    
+    cvd_reporte_bq_df = pd.read_gbq(query = query ,
                                     project_id = 'ew-tesis',
                                     credentials = bq_cred,
                                     dialect = 'standard')
@@ -55,8 +55,8 @@ def bq_cvd_reporte_df():
     return cvd_reporte_bq_df
 
 
-def bq_historico_carga_vd():
-    query = "SELECT * FROM `ew-tesis.dataset_tesis.historial_vd_cargados`"
+def bq_historico_carga_vd(query = "SELECT * FROM `ew-tesis.dataset_tesis.historial_vd_cargados`"):
+    
     cvd_historico = pd.read_gbq(   query = query ,
                                     project_id = 'ew-tesis',
                                     credentials = bq_cred,

@@ -15,7 +15,7 @@ def login_view(request):
         user = authenticate(request,username=username,password=password)
         if user:
                 login(request, user)
-                return redirect('home')#('/cuentas_por_pagar/')
+                return redirect('home')
         else:
                 return render(request,'users/login.html',{'error':'Acceso Denegado'})
     return render (request,'users/login.html')

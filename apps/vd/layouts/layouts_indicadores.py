@@ -51,12 +51,13 @@ def dash_indicador_resultados():
             Column([
                 loadingOverlay(cardGraph(id_graph = 'linea-vd', id_maximize = 'maximize-linea-vd',height=300))
             ],size=6),
-            Column([
-                loadingOverlay(cardGraph(id_graph = 'gauge-vd', id_maximize = 'maximize-gauge-vd',height=300))
-            ],size=3),
+            
             Column([
                 loadingOverlay(cardGraph(id_graph = 'bar-vd-novalido', id_maximize = 'maximize-bar-vd-novalido',height=300))
-            ],size=3),
+            ],size=4),
+            Column([
+                loadingOverlay(cardGraph(id_graph = 'gauge-vd', id_maximize = 'maximize-gauge-vd',height=300))
+            ],size=2),
             
             
         ]), 
@@ -111,9 +112,15 @@ def dash_indicador_resultados():
     def update_graficos(data):
         print('Callback de ALL-GRAFICOS')
         data_df = pd.DataFrame(data)
+        
         #gauge
         total_vd_realizar = calcular_total_vd(data_df)
+        
+        #total_vd_realizar = data_df['Numeró de Visitas Completas'].sum()
+        
         total_vd_validas = data_df['Visita Válida'].sum()
+        w = (total_vd_realizar-total_vd_validas)+total_vd_realizar
+        porcentaje = round((total_vd_validas/total_vd_realizar)*100,1)
         #bar no val
         vd_detalle_novalidos_df = data_df[data_df['Estado de Visita']!='Registrado']
         no_val_df = vd_detalle_novalidos_df.groupby(['Establecimiento de Salud','Estado de Visita'])[['Visita Válida']].count().reset_index()#['Visita Válida'].sum()
@@ -129,7 +136,8 @@ def dash_indicador_resultados():
         dispositivo_eess_df = data_df.groupby(['Dispositivo Intervención','Establecimiento de Salud'])[['Visita Válida']].count().sort_values('Visita Válida').reset_index()
         dispositivo_eess_df = dispositivo_eess_df.rename(columns = {'Visita Válida':'Número de Visitas'})
         return [
-            gauge_figure(value = total_vd_validas, maximo_value = total_vd_realizar, titulo = 'Número de Visitas Validas Realizadas'),
+            indicador_vd_figure(value = total_vd_realizar,delta_reference = w,title = 'Meta VD Completas',percent = porcentaje),
+            #gauge_figure(value = total_vd_validas, maximo_value = total_vd_realizar, titulo = 'Número de Visitas Validas Realizadas'),
             figure_bar_px(df = no_val_df ,x='Número de Visitas', y = 'Establecimiento de Salud', color = None, titulo = 'Visitas NO VALIDAS',showticklabels_x=False,bottom=20,top=40,height=300),
             figure_line_px(df = fecha_intervencion_df ,x='Fecha de Intervención', y = 'Número de Visitas', color = None,text='Número de Visitas', titulo = 'Serie de Tiempo de las Visitas Domiciliarias Realizadas',height=300),
             figure_bar_px(df = eess_etapa_df ,x='Número de Visitas', y = 'Establecimiento de Salud', color = 'Tipo de Registro', titulo = 'Estado de Visitas Domiciliarias por Establecimiento de Salud',bottom=30,top=90),
@@ -192,9 +200,24 @@ def dash_indicador_vd_oportunas():
             Column([cardSection(text='Promedio de Visitas por AS',radius='xs',id_value='card-promedio-as')],size=2),
             
         ]),
+        
         Row([
             Column([
-                Div(id='table-vd',style={'height':340})
+                loadingOverlay(cardGraph(id_graph = 'bar-estado-visitas', id_maximize = 'maximize-bar-estado-visitas',height=350))
+            ],size=5),
+            Column([
+                loadingOverlay(cardGraph(id_graph = 'line-vd-st', id_maximize = 'maximize-line-vd-st',height=350))
+            ],size=5),
+            Column([
+                loadingOverlay(cardGraph(id_graph = 'indicador', id_maximize = 'maximize-asdas',height=350))
+            ],size=2),
+            
+            
+            
+        ]), 
+        Row([
+            Column([
+                Div(id='table-vd',style={'height':300})
             ],size=6),
             Column([
                 loadingOverlay(cardGraph(id_graph = 'pie-eess-vd', id_maximize = 'maximize-pie-eess-vd',height=350))
@@ -202,17 +225,6 @@ def dash_indicador_vd_oportunas():
             Column([
                  loadingOverlay(cardGraph(id_graph = 'pie-etapa-vd', id_maximize = 'maximize-pie-etapa-vd',height=350))
             ],size=3),
-            
-            
-        ]), 
-        Row([
-            Column([
-                loadingOverlay(cardGraph(id_graph = 'bar-estado-visitas', id_maximize = 'maximize-bar-estado-visitas',height=350))
-            ],size=6),
-            Column([
-                loadingOverlay(cardGraph(id_graph = 'line-vd-st', id_maximize = 'maximize-line-vd-st',height=350))
-            ],size=6),
-            
             
             
         ]), 
@@ -275,7 +287,7 @@ def dash_indicador_vd_oportunas():
         ]
     
     @app.callback(               
-                #Output('select-eess','data'),
+                #Output('select-eess','data'),  
                 #Output('select-dispositivo','data'),
                 Output('card-total-menores','children'),
                 Output('card-total-vdc','children'),
@@ -289,6 +301,7 @@ def dash_indicador_vd_oportunas():
                 Output('pie-etapa-vd','figure'),
                 Output('line-vd-st','figure'),
                 Output('data-table','data'),
+                Output('indicador','figure'),
                
                 Input('data-vd-completas','data'),
                 Input('data-values','data'),       
@@ -313,6 +326,18 @@ def dash_indicador_vd_oportunas():
         
         st_fecha_inter_df = df.groupby(['Estado_VD','Fecha_Intervencion'])[['Actor_Social']].count().reset_index()
         st_fecha_inter_df =st_fecha_inter_df.rename(columns = {'Actor_Social':'Número de Visitas Realizadas'})
+        
+        
+        
+        
+        total_niños = round(int(dff_Data_['Estado_Visita'].count())*0.83,0)
+        
+        total_vd_oportunas_ = dff_Data_[dff_Data_['Estado_Visita']=='Visita Oportuna']['Estado_Visita'].count()
+        
+        #(total_vd_realizar-total_vd_validas)+total_vd_realizar
+        total_vd_oportunas = (total_niños - total_vd_oportunas_) + total_niños
+        porcentaje_indicador = round((total_vd_oportunas_/total_niños)*100,1)
+        
         return [
             total_ninos_cargados,
             total_ninos_vd,
@@ -342,7 +367,8 @@ def dash_indicador_vd_oportunas():
                                 
                                 ),
             figure_line_px(df = st_fecha_inter_df ,x='Fecha_Intervencion', y = 'Número de Visitas Realizadas', color = 'Estado_VD',text='Número de Visitas Realizadas', titulo = 'Serie de Tiempo de las Visitas Domiciliarias Realizadas',height=350,top=85),
-            dff_Data_.to_dict('series')
+            dff_Data_.to_dict('series'),
+            indicador_vd_figure(value = total_niños,delta_reference = total_vd_oportunas,title = 'Meta N° Niños',percent = porcentaje_indicador),
         ]
     @app.callback(
             
@@ -419,7 +445,11 @@ def dash_indicador_vd_consecutivas():
             Column([
                 loadingOverlay(cardGraph(id_graph = 'bar-total-vd', id_maximize = 'maximize-bar-total-vd',height=350))
                 
-            ],size=6),
+            ],size=4),
+            Column([
+                loadingOverlay(cardGraph(id_graph = 'indicador', id_maximize = 'maximize-indicador',height=350))
+                
+            ],size=2),
             
             
         ]),
@@ -504,6 +534,7 @@ def dash_indicador_vd_consecutivas():
                 #pie-eess_vd
                 Output('bar-total-vd','figure'),
                 Output('data-table','data'),
+                Output('indicador','figure'),
                 #Output('pie-eess-vd','figure'),
                 #Output('pie-etapa-vd','figure'),
                 #Output('line-vd-st','figure'),
@@ -539,6 +570,13 @@ def dash_indicador_vd_consecutivas():
         pie_dff_consecutivo = dff_pivot.groupby(['ESTADO_CONSECUTIVO'])[['Total_VD_REALIZADAS']].count().reset_index()
         vd_df_eess_mes = df.groupby(['Establecimito_Salud_Meta','Mes_VD'])[['Numero_VD']].count().reset_index()
         eess_dff_visits=table_num_vd_completas.groupby(['Establecimito_Salud_Meta'])[['Numero_de_Visitas_Completas']].count().reset_index()
+        print(dff_pivot.columns)
+        
+        total_indicador = round((total_niños_evaluados)*0.83,0)
+        total_consecutivo_ = dff_pivot[dff_pivot['ESTADO_CONSECUTIVO']=='Es VD Consecutiva']['ESTADO_CONSECUTIVO'].count()
+        total_consecutivo = (total_indicador - total_consecutivo_) + total_indicador
+        porcentaje_indicador = round((total_consecutivo_/total_indicador)*100,1)
+        #total_niños = round(total_niños_evaluados)*0.83,0)
         return [
             total_niños_evaluados,
             total_ninos_cargados,
@@ -565,8 +603,9 @@ def dash_indicador_vd_consecutivas():
                                 textposition = 'inside',
                                 list_or_color=px.colors.qualitative.T10
                                 ),
-            figure_bar_px(df = vd_df_eess_mes ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = 'Mes_VD', titulo = 'Número de Visitas por Periodo',showticklabels_x=True,bottom=20,top=85,height=350),
-            dff_pivot.to_dict('series')
+            figure_bar_px(df = vd_df_eess_mes ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = 'Mes_VD', titulo = 'Meta Niños Evaluados',showticklabels_x=True,bottom=20,top=85,height=350),
+            dff_pivot.to_dict('series'),
+            indicador_vd_figure(value = total_indicador,delta_reference = total_consecutivo,title = 'Meta de VD Consecutivas',percent = porcentaje_indicador),
         ]
     @app.callback(
             
@@ -586,12 +625,13 @@ def dash_indicador_vd_consecutivas():
 def dash_indicador_vd_georreferenciadas():
     print('DASHBOARD - VD GEO')
     print('Consulta de BG')
-    #historico
-    historico_vd_df=bq_historico_carga_vd()
-    vd_carga_dff = bq_cvd_df()
+    #historico#
+    #WHERE Rango_de_Edad
+    historico_vd_df=bq_historico_carga_vd(query = "SELECT * FROM `ew-tesis.dataset_tesis.historial_vd_cargados` WHERE Rango_de_Edad = '3 - 5 meses'")
+    vd_carga_dff = bq_cvd_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd` WHERE Rango_de_Edad ='3 - 5 meses'")
     #
-    cvd_detalle_df = bq_cvd_detalle_df()
-    cvd_reporte_df = bq_cvd_reporte_df() 
+    cvd_detalle_df = bq_cvd_detalle_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd_detalle` WHERE Rango_de_Edad ='3 - 5 meses'")
+    cvd_reporte_df = bq_cvd_reporte_df(query = "SELECT * FROM `ew-tesis.dataset_tesis.cvd_detalle_reporte` WHERE Rango_de_Edad ='3 - 5 meses'") 
     
     periodos = periodos_list()
     print('termina consulta')
@@ -626,22 +666,33 @@ def dash_indicador_vd_georreferenciadas():
         ]),
         Row([
             #Column([cardSection(text='Total de Niños Evaluados',radius='xs',id_value='card-total-evaluados')],size=2),
-            Column([cardSection(text='Total Niños Cargados',radius='xs',id_value='card-total-cargados')],size=3),
-            Column([cardSection(text='Total Visitas Completas',radius='xs',id_value='card-total-vd')],size=3),
-            Column([cardSection(text='Total Visitas Georreferenciadas',radius='xs',id_value='card-total-geo')],size=3),
-            Column([cardSection(text='% Visitas Georreferenciadas',radius='xs',id_value='card-porcentaje-geo')],size=3),
+            Column([cardSection(text='Niños Evaluados',radius='xs',id_value='card-total-cargados')],size=3),
+            Column([cardSection(text='Visitas Completas',radius='xs',id_value='card-total-vd')],size=3),
+            Column([cardSection(text='Visitas Realizadas Validas',radius='xs',id_value='card-total-geo')],size=3),
+            Column([cardSection(text='Visitas Georreferenciadas Validas',radius='xs',id_value='card-porcentaje-geo')],size=3),
             #Column([cardSection(text='Total Visitas Realizadas Válidas',radius='xs',id_value='card-total-vdrv')],size=2),
         ]),
         Row([
             Column([
-                loadingOverlay(cardGraph(id_graph = 'map-vd', id_maximize = 'maximize-map-vd',height=450))
-            ],size=5),
+                loadingOverlay(cardGraph(id_graph = 'map-vd', id_maximize = 'maximize-map-vd',height=700))
+            ],size=6),
             Column([
-                loadingOverlay(cardGraph(id_graph = 'pie-dispositivo', id_maximize = 'maximize-pie-dispositivo',height=450))
-            ],size=2),
-            Column([
-                 loadingOverlay(cardGraph(id_graph = 'bar-eess-movil', id_maximize = 'maximize-bar-eess-movil',height=450))
-            ],size=5),
+               Row([
+               Column([
+                loadingOverlay(cardGraph(id_graph = 'pie-dispositivo', id_maximize = 'maximize-pie-dispositivo',height=300))
+                ],size=6),
+               Column([
+                loadingOverlay(cardGraph(id_graph = 'indicador', id_maximize = 'maximize-indicador',height=300))
+                ],size=6),
+               ]),
+               Row([
+                Column([
+                 loadingOverlay(cardGraph(id_graph = 'bar-eess-movil', id_maximize = 'maximize-bar-eess-movil',height=400))
+                ],size=12),
+                
+                ]),
+            ],size=6),
+           
         ]),
         Div(id='notifications-update-data'),
         Store(id='data-vd-completas'),
@@ -676,6 +727,8 @@ def dash_indicador_vd_georreferenciadas():
         vd_det_as_df=historicof_vd_dff.groupby(['Numero_Doc_Nino','Actor_Social'])[['Rango_de_Edad']].count().reset_index()
         table_num_vd_completas = historicof_carga_dff.groupby(['Numero_Doc_Nino','Establecimito_Salud_Meta'])[['Numero_de_Visitas_Completas']].sum().reset_index()
         table_num_vd_completas = table_num_vd_completas.merge(vd_det_as_df,how ='left', on = 'Numero_Doc_Nino').fillna('No Especificado')
+        
+        #table_num_vd_completas.to_excel('test_geo.xlsx')
         #vd_df = vd_detalle_df[vd_detalle_df['Fecha_Carga']==carga]
         if (eess == None or len(eess) == 0) and actor_social == None:
             filt_df = historicof_vd_dff.copy()
@@ -709,6 +762,7 @@ def dash_indicador_vd_georreferenciadas():
                 Output('pie-dispositivo','figure'),
                 Output('bar-eess-movil','figure'),
                 Output('data-table','data'),
+                Output('indicador','figure'),
                 
                
                 Input('data-vd-completas','data'),
@@ -717,15 +771,16 @@ def dash_indicador_vd_georreferenciadas():
     def update_data(data_table,data):
         print('Callback de ALL-GRAFICOS')
         table_num_vd_completas = pd.DataFrame(data_table)
-        df = pd.DataFrame(data)
-        print(df.columns)
+        table_num_vd_completas=table_num_vd_completas.groupby(['Numero_Doc_Nino','Numero_de_Visitas_Completas'])[['Actor_Social']].count().reset_index()
         
+        df = pd.DataFrame(data)
+       
         total_ninos_cargados = table_num_vd_completas['Numero_Doc_Nino'].count()
         total_ninos_vd = table_num_vd_completas['Numero_de_Visitas_Completas'].sum()
         
         total_vd_realizadas = df['VD_Valida'].sum()
         total_geo = df[(df['Dispositivo_Intervencion']=='MOVIL')&(df['Estado_Intervencion_VD']=='Registrado')]['Dispositivo_Intervencion'].count()
-        porcentaje = f"{round((total_geo/total_vd_realizadas)*100)}%"#
+        
         #promedio_eess = round(total_vd_realizadas/len(df['Establecimito_Salud_Meta'].unique()))
         df['Latitud_Intervencion']=df['Latitud_Intervencion'].fillna(0)
         df['Longitud_Intervencion']=df['Longitud_Intervencion'].fillna(0)
@@ -736,32 +791,36 @@ def dash_indicador_vd_georreferenciadas():
                     lon="Longitud_Intervencion",
                     hover_name="Establecimito_Salud_Meta",
                     hover_data=["Actor_Social", "Nombres_del_Nino"],
-                    #color_discrete_map =dict_eess,
                     zoom=12,
-                    height=450,
+                    height=700,
                 )
         fig.update_layout(mapbox_style="open-street-map")
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
         dispositivo_dff = df.groupby(['Dispositivo_Intervencion'])[['Numero_VD']].count().reset_index()
         dff = df[(df['Dispositivo_Intervencion']=='MOVIL')&(df['Estado_Intervencion_VD']=='Registrado')]
         eess_movil_dff = dff.groupby(['Establecimito_Salud_Meta'])[['Numero_VD']].count().sort_values('Numero_VD').reset_index()
+        total_indicador = round(total_vd_realizadas*0.47,0)
+        total_vd_geo = (total_indicador - total_geo) + total_indicador
+        porcentaje_indicador = round((total_geo/total_indicador)*100,1)
         return[
             total_ninos_cargados,
             total_ninos_vd,
+            total_vd_realizadas,
             total_geo,
-            porcentaje,
             fig,
             pie_figure(df=dispositivo_dff,
                                 label_col='Dispositivo_Intervencion', 
                                 value_col='Numero_VD',
-                                height=450, 
+                                height=300, 
                                 showlegend=False,
                                 title= 'Dispositivo de Intervención',
                                 textposition = 'inside',
                                 list_or_color=px.colors.qualitative.T10
                                 ),
-             figure_bar_px(df = eess_movil_dff ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = None, titulo = 'Visitas por Dispositivo Movil',showticklabels_x=True,bottom=20,top=60,height=450),
-             geo_df.to_dict('series')
+             figure_bar_px(df = eess_movil_dff ,x='Numero_VD', y = 'Establecimito_Salud_Meta', color = None, titulo = 'Visitas Validas por Dispositivo Movil ',showticklabels_x=True,bottom=20,top=60,height=400),
+             geo_df.to_dict('series'),
+             indicador_vd_figure(value = total_indicador,delta_reference = total_vd_geo,title = 'Meta N° VD Geo',percent = porcentaje_indicador),
+             
         ]
     @app.callback(
             
