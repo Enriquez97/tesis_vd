@@ -83,3 +83,30 @@ DROP_VD_DETALLADO= [
 EESS_TRUJILLO=['LIBERTAD', 'CLUB DE LEONES', 'LOS GRANADOS "SAGRADO CORAZON"','LOS JARDINES', 'SAN MARTIN DE PORRES', 'PESQUEDA II', 'EL BOSQUE','ARANJUEZ', 'CENTRO DE SALUD LA UNION', 'PESQUEDA III']
 
 LISTA_COLORES_BAR = px.colors.diverging.Portland+px.colors.diverging.Earth+px.colors.diverging.balance+px.colors.diverging.Tealrose+px.colors.qualitative.Plotly+px.colors.qualitative.Dark24+px.colors.qualitative.Light24+px.colors.qualitative.Alphabet
+
+
+CONDITIONAL_EFECTIVAS = [
+    {
+    "condition": "params.data.VD_Efectivas_Porcentaje < 70",
+     "style":{"backgroundColor": "#ff0000"}
+    },
+    {
+    "condition": "params.data.VD_Efectivas_Porcentaje >= 70 && params.data.VD_Efectivas_Porcentaje < 80",
+     "style":{"backgroundColor": "#ffff00"}
+    },
+    {
+    "condition": "params.data.VD_Efectivas_Porcentaje >= 80",
+     "style":{"backgroundColor": "#008000", "color": "white"}
+    },
+]
+
+CONDITIONAL_GEO= [
+    {
+    "condition": "params.data.VD_Geo_Porcentaje < 47",
+     "style":{"backgroundColor": "#ff0000"}
+    },
+    {
+    "condition": "params.data.VD_Geo_Porcentaje >= 47",
+     "style":{"backgroundColor": "#008000", "color": "white"}
+    },
+]
